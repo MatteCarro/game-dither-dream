@@ -140,23 +140,23 @@ function DitherForge() {
         </div>
         <nav className="flex-1 overflow-y-auto px-3 pb-6 text-sm">
           <SidebarSection label="Workspace">
-            <NavItem icon={Pencil} label="Editor" active />
-            <NavItem icon={Layers} label="Batch Processor" />
-            <NavItem icon={ImageIcon} label="Gallery" />
+            <NavItem icon={Pencil} label="Editor" active={activeView === "Editor"} onClick={() => setActiveView("Editor")} />
+            <NavItem icon={Layers} label="Batch Processor" active={activeView === "Batch Processor"} onClick={() => { setActiveView("Batch Processor"); openComingSoon("Batch Processor"); }} />
+            <NavItem icon={ImageIcon} label="Gallery" active={activeView === "Gallery"} onClick={() => { setActiveView("Gallery"); openComingSoon("Gallery"); }} />
           </SidebarSection>
           <SidebarSection label="Dither">
-            <NavItem icon={Sliders} label="Algorithms" />
-            <NavItem icon={PaletteIcon} label="Palettes" />
+            <NavItem icon={Sliders} label="Algorithms" onClick={() => openComingSoon("Algorithms manager")} />
+            <NavItem icon={PaletteIcon} label="Palettes" onClick={() => openComingSoon("Palette editor")} />
           </SidebarSection>
           <SidebarSection label="Tools">
-            <NavItem icon={GitCompare} label="Compare" />
-            <NavItem icon={Monitor} label="Preview (CRT)" />
-            <NavItem icon={Download} label="Export" />
+            <NavItem icon={GitCompare} label="Compare" active={compareMode} onClick={() => setCompareMode((v) => !v)} />
+            <NavItem icon={Monitor} label="Preview (CRT)" active={crtPreview} onClick={() => setCrtPreview((v) => !v)} />
+            <NavItem icon={Download} label="Export" onClick={() => setDialog("export")} />
           </SidebarSection>
           <SidebarSection label="Settings">
-            <NavItem icon={Settings} label="Preferences" />
-            <NavItem icon={Keyboard} label="Keyboard Shortcuts" />
-            <NavItem icon={Info} label="About" />
+            <NavItem icon={Settings} label="Preferences" onClick={() => setDialog("preferences")} />
+            <NavItem icon={Keyboard} label="Keyboard Shortcuts" onClick={() => setDialog("shortcuts")} />
+            <NavItem icon={Info} label="About" onClick={() => setDialog("about")} />
           </SidebarSection>
         </nav>
       </aside>
