@@ -431,9 +431,10 @@ function SidebarSection({ label, children }: { label: string; children: React.Re
   );
 }
 
-function NavItem({ icon: Icon, label, active }: { icon: React.ComponentType<{ className?: string }>; label: string; active?: boolean }) {
+function NavItem({ icon: Icon, label, active, onClick }: { icon: React.ComponentType<{ className?: string }>; label: string; active?: boolean; onClick?: () => void }) {
   return (
     <button
+      onClick={onClick}
       className={cn(
         "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
         active ? "bg-panel text-foreground" : "text-muted-foreground hover:bg-panel/60 hover:text-foreground",
