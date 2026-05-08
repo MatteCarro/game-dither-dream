@@ -45,6 +45,22 @@ function DitherForge() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set(["Game Boy (DMG)"]));
   const [zoom, setZoom] = useState(100);
   const [source, setSource] = useState<ImageData | null>(null);
+  const [crtPreview, setCrtPreview] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [pixelGrid, setPixelGrid] = useState(false);
+  const [activeView, setActiveView] = useState<string>("Editor");
+  const [dialog, setDialog] = useState<null | "preferences" | "shortcuts" | "about" | "comingsoon" | "export">(null);
+  const [comingSoonLabel, setComingSoonLabel] = useState("");
+  const [dark, setDark] = useState(true);
+
+  function openComingSoon(label: string) {
+    setComingSoonLabel(label);
+    setDialog("comingsoon");
+  }
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("light", !dark);
+  }, [dark]);
 
   const palette = useMemo(() => PALETTES.find((p) => p.name === paletteName) ?? PALETTES[0], [paletteName]);
   const sourceCanvas = useRef<HTMLCanvasElement>(null);
