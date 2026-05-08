@@ -107,6 +107,7 @@ function DitherForge() {
   const [imageShadows, setImageShadows] = useState(0);
   const [imageTemperature, setImageTemperature] = useState(0);
   const [imageBlur, setImageBlur] = useState(0);
+  const [imageGlow, setImageGlow] = useState(0);
   const [socialTab, setSocialTab] = useState("PulseDeck");
   const [pulseDeckIndex, setPulseDeckIndex] = useState(0);
   const [pulseSwipeDirection, setPulseSwipeDirection] = useState<null | "left" | "right">(null);
@@ -308,6 +309,7 @@ function DitherForge() {
       shadows: imageShadows,
       temperature: imageTemperature,
       blur: imageBlur,
+      glow: imageGlow,
     });
     const out = dither(processed, palette.colors, renderAlgorithm, {
       intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen,
@@ -334,7 +336,7 @@ function DitherForge() {
       c.width = out.width; c.height = out.height;
       c.getContext("2d")!.putImageData(out, 0, 0);
     }
-  }, [source, palette, renderAlgorithm, intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen, pixelSize, imageBrightness, imageContrast, imageSaturation, imageGamma, imageHighlights, imageShadows, imageTemperature, imageBlur]);
+  }, [source, palette, renderAlgorithm, intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen, pixelSize, imageBrightness, imageContrast, imageSaturation, imageGamma, imageHighlights, imageShadows, imageTemperature, imageBlur, imageGlow]);
 
   function loadFile(file: File) {
     const url = URL.createObjectURL(file);
@@ -1970,6 +1972,9 @@ function DitherForge() {
               </Row>
               <Row label="Blur" trailing={`${imageBlur}px`}>
                 <Slider value={[imageBlur]} onValueChange={(v) => setImageBlur(v[0])} min={0} max={5} step={0.5} className="w-32" />
+              </Row>
+              <Row label="Glow" trailing={`${imageGlow}%`}>
+                <Slider value={[imageGlow]} onValueChange={(v) => setImageGlow(v[0])} min={0} max={100} step={1} className="w-32" />
               </Row>
             </div>
 

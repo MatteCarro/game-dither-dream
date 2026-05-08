@@ -39,10 +39,14 @@ export const ALGORITHMS = [
   "Sierra",
   "Sierra-2",
   "Sierra Lite",
+  "Stevenson-Arce",
+  "Shiau-Fan",
+  "Riemersma",
   "Halftone",
   "Bayer 4x4",
   "Bayer 8x8",
   "Bayer 16x16",
+  "Blue Noise",
   "Threshold",
 ] as const;
 export type Algorithm = (typeof ALGORITHMS)[number];
@@ -77,6 +81,29 @@ function applyBlur(data: Float32Array, width: number, height: number, radius: nu
   return out;
 }
 
+function applyGlow(data: Float32Array, width: number, height: number, amount: number, threshold = 0.55): Float32Array {
+  if (amount <= 0) return data;
+  const bright = new Float32Array(data.length);
+  for (let i = 0; i < data.length; i += 4) {
+    const lum = (0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]) / 255;
+    const t = Math.max(0, lum - threshold) / (1 - threshold + 1e-6);
+    const k = t * t;
+    bright[i] = data[i] * k;
+    bright[i + 1] = data[i + 1] * k;
+    bright[i + 2] = data[i + 2] * k;
+    bright[i + 3] = 0;
+  }
+  const radius = Math.max(2, Math.round(2 + amount / 14));
+  const blurred = applyBlur(bright, width, height, radius);
+  const gain = amount / 60;
+  for (let i = 0; i < data.length; i += 4) {
+    data[i] = Math.min(255, data[i] + blurred[i] * gain);
+    data[i + 1] = Math.min(255, data[i + 1] + blurred[i + 1] * gain);
+    data[i + 2] = Math.min(255, data[i + 2] + blurred[i + 2] * gain);
+  }
+  return data;
+}
+
 export function preprocessImage(
   src: ImageData,
   options: {
@@ -88,6 +115,7 @@ export function preprocessImage(
     shadows?: number;
     temperature?: number;
     blur?: number;
+    glow?: number;
   }
 ): ImageData {
   const { width, height } = src;
@@ -96,6 +124,10 @@ export function preprocessImage(
 
   if (options.blur && options.blur > 0) {
     data = applyBlur(data, width, height, options.blur);
+  }
+
+  if (options.glow && options.glow > 0) {
+    data = applyGlow(data, width, height, options.glow);
   }
 
   const out = new ImageData(width, height);
@@ -232,7 +264,35 @@ const DIFFUSIONS: Record<string, Diffusion> = {
   Sierra: { divisor: 32, matrix: [[1,0,5],[2,0,3],[-2,1,2],[-1,1,4],[0,1,5],[1,1,4],[2,1,2],[-1,2,2],[0,2,3],[1,2,2]] },
   "Sierra-2": { divisor: 16, matrix: [[1,0,4],[2,0,3],[-2,1,1],[-1,1,2],[0,1,3],[1,1,2],[2,1,1]] },
   "Sierra Lite": { divisor: 4, matrix: [[1,0,2],[-1,1,1],[0,1,1]] },
+  "Stevenson-Arce": { divisor: 200, matrix: [[2,0,32],[-3,1,12],[-1,1,26],[1,1,30],[3,1,16],[-2,2,12],[0,2,26],[2,2,12],[-3,3,5],[-1,3,12],[1,3,12],[3,3,5]] },
+  "Shiau-Fan": { divisor: 8, matrix: [[1,0,4],[-2,1,1],[-1,1,1],[0,1,2]] },
 };
+
+// Hilbert curve coordinates for d in [0, n*n) on 2^k square
+function hilbertD2XY(n: number, d: number): [number, number] {
+  let x = 0, y = 0, t = d;
+  for (let s = 1; s < n; s *= 2) {
+    const rx = 1 & (t >> 1);
+    const ry = 1 & (t ^ rx);
+    if (ry === 0) {
+      if (rx === 1) {
+        x = s - 1 - x;
+        y = s - 1 - y;
+      }
+      const tmp = x; x = y; y = tmp;
+    }
+    x += s * rx;
+    y += s * ry;
+    t >>= 2;
+  }
+  return [x, y];
+}
+
+// Interleaved Gradient Noise (Jorge Jimenez) - blue-noise-like, fast
+function ign(x: number, y: number): number {
+  const v = 52.9829189 * (((0.06711056 * x + 0.00583715 * y) % 1) + 1);
+  return ((v % 1) + 1) % 1;
+}
 
 export function dither(
   src: ImageData,
@@ -276,9 +336,23 @@ export function dither(
 
   const intensity = options.intensity / 100;
 
-  const isOrdered = algo.startsWith("Bayer") || algo === "Halftone" || algo === "Threshold";
+  const isOrdered = algo.startsWith("Bayer") || algo === "Halftone" || algo === "Threshold" || algo === "Blue Noise";
 
   if (isOrdered) {
+    if (algo === "Blue Noise") {
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const i = (y * width + x) * 4;
+          const t = (ign(x, y) - 0.5) * 255 * intensity;
+          const r = Math.max(0, Math.min(255, data[i] + t));
+          const g = Math.max(0, Math.min(255, data[i + 1] + t));
+          const b = Math.max(0, Math.min(255, data[i + 2] + t));
+          const [nr, ng, nb] = nearest(palette, r, g, b, options.colorGamma);
+          out.data[i] = nr; out.data[i + 1] = ng; out.data[i + 2] = nb; out.data[i + 3] = 255;
+        }
+      }
+      return out;
+    }
     const matrix = algo === "Halftone" ? HALFTONE8 : algo === "Bayer 16x16" ? BAYER16 : algo === "Bayer 8x8" ? BAYER8 : BAYER4;
     const size = matrix.length;
     const denom = size * size;
@@ -292,6 +366,43 @@ export function dither(
         const [nr, ng, nb] = nearest(palette, r, g, b, options.colorGamma);
         out.data[i] = nr; out.data[i + 1] = ng; out.data[i + 2] = nb; out.data[i + 3] = 255;
       }
+    }
+    return out;
+  }
+
+  // Riemersma dither: traverse along Hilbert curve with weighted error queue
+  if (algo === "Riemersma") {
+    const N = 16;
+    const B = 16; // exponential base
+    const weights: number[] = [];
+    let wsum = 0;
+    for (let k = 0; k < N; k++) {
+      const w = Math.pow(B, k / (N - 1));
+      weights.push(w);
+      wsum += w;
+    }
+    const qr = new Float32Array(N), qg = new Float32Array(N), qb = new Float32Array(N);
+    let qhead = 0;
+    let n = 1;
+    while (n < width || n < height) n *= 2;
+    const total = n * n;
+    for (let d = 0; d < total; d++) {
+      const [x, y] = hilbertD2XY(n, d);
+      if (x >= width || y >= height) continue;
+      const i = (y * width + x) * 4;
+      let er = 0, eg = 0, eb = 0;
+      for (let k = 0; k < N; k++) {
+        const idx = (qhead + k) % N;
+        const w = weights[k] / wsum;
+        er += qr[idx] * w; eg += qg[idx] * w; eb += qb[idx] * w;
+      }
+      const r = Math.max(0, Math.min(255, data[i] + er * intensity));
+      const g = Math.max(0, Math.min(255, data[i + 1] + eg * intensity));
+      const b = Math.max(0, Math.min(255, data[i + 2] + eb * intensity));
+      const [nr, ng, nb] = nearest(palette, r, g, b, options.colorGamma);
+      out.data[i] = nr; out.data[i + 1] = ng; out.data[i + 2] = nb; out.data[i + 3] = 255;
+      qr[qhead] = r - nr; qg[qhead] = g - ng; qb[qhead] = b - nb;
+      qhead = (qhead + 1) % N;
     }
     return out;
   }
