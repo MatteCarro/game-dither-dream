@@ -4,9 +4,11 @@ import {
   Home, Redo2, Undo2, Search, FilePlus2, FolderOpen, Save, Moon,
   Pencil, Layers, Image as ImageIcon, Sliders, Palette as PaletteIcon,
   GitCompare, Monitor, Download, Settings, Keyboard, Info, Play, Grid3x3,
-  Shuffle, Star, ChevronDown, Box, Sun, Sparkles,
+  Star, ChevronDown, Box, Sun, Sparkles, Share2,
+  X, Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -16,7 +18,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
-import { ALGORITHMS, PALETTES, dither, makeSampleImage, type Algorithm } from "@/lib/dither";
+import { ALGORITHMS, PALETTES, dither, makeSampleImage, type Algorithm, type Palette } from "@/lib/dither";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -30,11 +32,33 @@ export const Route = createFileRoute("/")({
 });
 
 const CATEGORIES = ["All", "Retro Gaming", "Consoles", "Computers", "Arcade", "TV / Monitors", "Custom"] as const;
+const ALGORITHM_WARNING_STORAGE_KEY = "ditherForge.hideAlgorithmExpertWarning";
+const ALGORITHM_GUIDE_STORAGE_KEY = "ditherForge.hideAlgorithmMiniGuide";
+const CUSTOM_ALGORITHMS_STORAGE_KEY = "ditherForge.customAlgorithms";
+const CUSTOM_PALETTES_STORAGE_KEY = "ditherForge.customPalettes";
+type CustomAlgorithm = {
+  name: string;
+  base: Algorithm;
+  patternSize: number;
+  thresholdBias: number;
+  diffusionAmount: number;
+  expertMode: boolean;
+  diffusionWeight: number;
+  tonalProtection: number;
+  edgePreservation: number;
+  grainShaping: number;
+};
+const SOCIAL_ALGORITHMS = [
+  { name: "Neon Ghost Diffusion", author: "pixel_mara", base: "Floyd–Steinberg", color: "#29adff", tags: ["cyber", "blue", "photo"], likes: 128 },
+  { name: "Amber Terminal Bloom", author: "crt_works", base: "Atkinson", color: "#ffbb33", tags: ["amber", "terminal", "soft"], likes: 94 },
+  { name: "Arcade Ink Storm", author: "arcade_luca", base: "Halftone", color: "#ff004d", tags: ["halftone", "print", "bold"], likes: 211 },
+  { name: "Pocket LCD Mist", author: "dmg_sara", base: "Bayer 4x4", color: "#9bbc0f", tags: ["gameboy", "green", "ordered"], likes: 177 },
+];
 
 function DitherForge() {
-  const [algo, setAlgo] = useState<Algorithm>("Floyd–Steinberg");
+  const [algo, setAlgo] = useState<string>("Floyd–Steinberg");
   const [intensity, setIntensity] = useState(75);
-  const [bitDepth, setBitDepth] = useState<1 | 2 | 4 | 8>(1);
+  const [bitDepth, setBitDepth] = useState<1 | 2 | 4 | 8 | 16>(1);
   const [paletteName, setPaletteName] = useState("Game Boy (DMG)");
   const [serpentine, setSerpentine] = useState(true);
   const [errorDiffusion, setErrorDiffusion] = useState(true);
@@ -46,23 +70,182 @@ function DitherForge() {
   const [zoom, setZoom] = useState(100);
   const [source, setSource] = useState<ImageData | null>(null);
   const [crtPreview, setCrtPreview] = useState(false);
+  const [crtScanlines, setCrtScanlines] = useState(35);
+  const [crtVignette, setCrtVignette] = useState(70);
+  const [crtCurvature, setCrtCurvature] = useState(6);
+  const [crtGlow, setCrtGlow] = useState(35);
+  const [crtChromatic, setCrtChromatic] = useState(12);
+  const [crtNoise, setCrtNoise] = useState(8);
+  const [showCrtControls, setShowCrtControls] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
   const [pixelGrid, setPixelGrid] = useState(false);
   const [activeView, setActiveView] = useState<string>("Editor");
-  const [dialog, setDialog] = useState<null | "preferences" | "shortcuts" | "about" | "comingsoon" | "export">(null);
+  const [socialTab, setSocialTab] = useState("PulseDeck");
+  const [pulseDeckIndex, setPulseDeckIndex] = useState(0);
+  const [socialColorSearch, setSocialColorSearch] = useState("#29adff");
+  const [socialAlgorithmSearch, setSocialAlgorithmSearch] = useState("Floyd–Steinberg");
+  const [dialog, setDialog] = useState<null | "preferences" | "shortcuts" | "about" | "comingsoon" | "export" | "algorithmWarning" | "algorithmGuide">(null);
   const [comingSoonLabel, setComingSoonLabel] = useState("");
   const [dark, setDark] = useState(true);
+  const [hideAlgorithmWarning, setHideAlgorithmWarning] = useState(false);
+  const [customAlgorithmName, setCustomAlgorithmName] = useState("My Custom Dither");
+  const [customAlgorithmBase, setCustomAlgorithmBase] = useState<Algorithm>("Floyd–Steinberg");
+  const [patternSize, setPatternSize] = useState(4);
+  const [thresholdBias, setThresholdBias] = useState(0);
+  const [diffusionAmount, setDiffusionAmount] = useState(60);
+  const [expertAlgorithmMode, setExpertAlgorithmMode] = useState(false);
+  const [diffusionWeight, setDiffusionWeight] = useState(75);
+  const [tonalProtection, setTonalProtection] = useState(40);
+  const [edgePreservation, setEdgePreservation] = useState(50);
+  const [grainShaping, setGrainShaping] = useState(25);
+  const [hideAlgorithmGuide, setHideAlgorithmGuide] = useState(false);
+  const [showEditorGuide, setShowEditorGuide] = useState(true);
+  const [customAlgorithms, setCustomAlgorithms] = useState<CustomAlgorithm[]>([]);
+  const [algorithmSaved, setAlgorithmSaved] = useState(false);
+  const [customPalettes, setCustomPalettes] = useState<Palette[]>([]);
+  const [customPaletteName, setCustomPaletteName] = useState("My Custom Palette");
+  const [customPaletteColors, setCustomPaletteColors] = useState(["#0b0f1a", "#26324a", "#577590", "#f3ca40", "#f2a65a", "#f25c54"]);
+  const [paletteSaved, setPaletteSaved] = useState(false);
 
   function openComingSoon(label: string) {
     setComingSoonLabel(label);
     setDialog("comingsoon");
   }
 
+  function openAlgorithmLab() {
+    if (typeof window !== "undefined" && window.localStorage.getItem(ALGORITHM_WARNING_STORAGE_KEY) === "true") {
+      openAlgorithmGuideOrEditor();
+      return;
+    }
+    setHideAlgorithmWarning(false);
+    setDialog("algorithmWarning");
+  }
+
+  function continueToAlgorithmLab() {
+    if (hideAlgorithmWarning && typeof window !== "undefined") {
+      window.localStorage.setItem(ALGORITHM_WARNING_STORAGE_KEY, "true");
+    }
+    openAlgorithmGuideOrEditor();
+  }
+
+  function openAlgorithmGuideOrEditor() {
+    if (typeof window !== "undefined" && window.localStorage.getItem(ALGORITHM_GUIDE_STORAGE_KEY) === "true") {
+      setActiveView("Algorithms");
+      setDialog(null);
+      return;
+    }
+    setHideAlgorithmGuide(false);
+    setDialog("algorithmGuide");
+  }
+
+  function continueFromAlgorithmGuide() {
+    if (hideAlgorithmGuide && typeof window !== "undefined") {
+      window.localStorage.setItem(ALGORITHM_GUIDE_STORAGE_KEY, "true");
+      setShowEditorGuide(false);
+    }
+    setActiveView("Algorithms");
+    setDialog(null);
+  }
+
+  const paletteOptions = useMemo(() => [...PALETTES, ...customPalettes], [customPalettes]);
+  const palette = useMemo(() => paletteOptions.find((p) => p.name === paletteName) ?? paletteOptions[0], [paletteName, paletteOptions]);
+  const paletteFixedBitDepth = useMemo(() => {
+    const match = palette.name.match(/\b(1|2|4|8|16)-bit\b/i);
+    return match ? (Number(match[1]) as 1 | 2 | 4 | 8 | 16) : null;
+  }, [palette.name]);
+  const selectedCustomAlgorithm = useMemo(() => customAlgorithms.find((a) => a.name === algo) ?? null, [customAlgorithms, algo]);
+  const renderAlgorithm = selectedCustomAlgorithm?.base ?? (ALGORITHMS.includes(algo as Algorithm) ? (algo as Algorithm) : "Floyd–Steinberg");
+  const algorithmOptions = useMemo(() => [...ALGORITHMS, ...customAlgorithms.map((a) => a.name)], [customAlgorithms]);
+  const pulseDeckItem = SOCIAL_ALGORITHMS[pulseDeckIndex % SOCIAL_ALGORITHMS.length];
+
   useEffect(() => {
     document.documentElement.classList.toggle("light", !dark);
   }, [dark]);
 
-  const palette = useMemo(() => PALETTES.find((p) => p.name === paletteName) ?? PALETTES[0], [paletteName]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(CUSTOM_ALGORITHMS_STORAGE_KEY);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored) as CustomAlgorithm[];
+      if (Array.isArray(parsed)) setCustomAlgorithms(parsed);
+    } catch {
+      window.localStorage.removeItem(CUSTOM_ALGORITHMS_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(CUSTOM_PALETTES_STORAGE_KEY);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored) as Palette[];
+      if (Array.isArray(parsed)) setCustomPalettes(parsed);
+    } catch {
+      window.localStorage.removeItem(CUSTOM_PALETTES_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (paletteFixedBitDepth && bitDepth !== paletteFixedBitDepth) {
+      setBitDepth(paletteFixedBitDepth);
+    }
+  }, [paletteFixedBitDepth, bitDepth]);
+
+  function saveCustomAlgorithm() {
+    const name = customAlgorithmName.trim() || "Untitled Custom Dither";
+    const saved: CustomAlgorithm = {
+      name,
+      base: customAlgorithmBase,
+      patternSize,
+      thresholdBias,
+      diffusionAmount,
+      expertMode: expertAlgorithmMode,
+      diffusionWeight,
+      tonalProtection,
+      edgePreservation,
+      grainShaping,
+    };
+    const next = [...customAlgorithms.filter((a) => a.name !== name), saved];
+    setCustomAlgorithms(next);
+    setAlgo(name);
+    setAlgorithmSaved(true);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(CUSTOM_ALGORITHMS_STORAGE_KEY, JSON.stringify(next));
+    }
+    window.setTimeout(() => setAlgorithmSaved(false), 1600);
+  }
+
+  function updateCustomPaletteColor(index: number, value: string) {
+    setCustomPaletteColors((colors) => colors.map((color, i) => i === index ? value : color));
+  }
+
+  function addCustomPaletteColor() {
+    setCustomPaletteColors((colors) => [...colors, "#ffffff"]);
+  }
+
+  function removeCustomPaletteColor(index: number) {
+    setCustomPaletteColors((colors) => colors.length <= 2 ? colors : colors.filter((_, i) => i !== index));
+  }
+
+  function saveCustomPalette() {
+    const name = customPaletteName.trim() || "Untitled Custom Palette";
+    const saved: Palette = {
+      name,
+      category: "Custom",
+      colors: customPaletteColors,
+    };
+    const next = [...customPalettes.filter((p) => p.name !== name), saved];
+    setCustomPalettes(next);
+    setPaletteName(name);
+    setCategory("Custom");
+    setPaletteSaved(true);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(CUSTOM_PALETTES_STORAGE_KEY, JSON.stringify(next));
+    }
+    window.setTimeout(() => setPaletteSaved(false), 1600);
+  }
+
   const sourceCanvas = useRef<HTMLCanvasElement>(null);
   const previewCanvas = useRef<HTMLCanvasElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -81,13 +264,13 @@ function DitherForge() {
   // dither
   useEffect(() => {
     if (!source || !previewCanvas.current) return;
-    const out = dither(source, palette.colors, algo, {
+    const out = dither(source, palette.colors, renderAlgorithm, {
       intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen,
     });
     const c = previewCanvas.current;
     c.width = out.width; c.height = out.height;
     c.getContext("2d")!.putImageData(out, 0, 0);
-  }, [source, palette, algo, intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen]);
+  }, [source, palette, renderAlgorithm, intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen]);
 
   function loadFile(file: File) {
     const url = URL.createObjectURL(file);
@@ -118,8 +301,8 @@ function DitherForge() {
     });
   }
 
-  const filteredPalettes = PALETTES.filter((p) => {
-    if (category !== "All" && category !== "Custom" && p.category !== category) return false;
+  const filteredPalettes = paletteOptions.filter((p) => {
+    if (category !== "All" && p.category !== category) return false;
     if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
@@ -143,14 +326,15 @@ function DitherForge() {
             <NavItem icon={Pencil} label="Editor" active={activeView === "Editor"} onClick={() => setActiveView("Editor")} />
             <NavItem icon={Layers} label="Batch Processor" active={activeView === "Batch Processor"} onClick={() => { setActiveView("Batch Processor"); openComingSoon("Batch Processor"); }} />
             <NavItem icon={ImageIcon} label="Gallery" active={activeView === "Gallery"} onClick={() => { setActiveView("Gallery"); openComingSoon("Gallery"); }} />
+            <NavItem icon={Share2} label="Social" active={activeView === "Social"} onClick={() => setActiveView("Social")} />
           </SidebarSection>
           <SidebarSection label="Dither">
-            <NavItem icon={Sliders} label="Algorithms" onClick={() => openComingSoon("Algorithms manager")} />
-            <NavItem icon={PaletteIcon} label="Palettes" onClick={() => openComingSoon("Palette editor")} />
+            <NavItem icon={Sliders} label="Algorithms" active={activeView === "Algorithms" || dialog === "algorithmWarning" || dialog === "algorithmGuide"} onClick={openAlgorithmLab} />
+            <NavItem icon={PaletteIcon} label="Palettes" active={activeView === "Palettes"} onClick={() => setActiveView("Palettes")} />
           </SidebarSection>
           <SidebarSection label="Tools">
             <NavItem icon={GitCompare} label="Compare" active={compareMode} onClick={() => setCompareMode((v) => !v)} />
-            <NavItem icon={Monitor} label="Preview (CRT)" active={crtPreview} onClick={() => setCrtPreview((v) => !v)} />
+            <NavItem icon={Monitor} label="Preview (CRT)" active={activeView === "CRT" || crtPreview} onClick={() => setActiveView("CRT")} />
             <NavItem icon={Download} label="Export" onClick={() => setDialog("export")} />
           </SidebarSection>
           <SidebarSection label="Settings">
@@ -203,6 +387,595 @@ function DitherForge() {
         </header>
 
         {/* Workspace */}
+        {activeView === "Algorithms" ? (
+          <div className="flex-1 overflow-y-auto p-5">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-wider text-cream">Dither / Algorithms</div>
+                <h2 className="mt-1 text-2xl font-semibold">Algorithm Lab</h2>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  Crea un algoritmo custom selezionabile partendo da un preset reale e salvando una blueprint tecnica riutilizzabile.
+                </p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setActiveView("Editor")}>Torna all'Editor</Button>
+            </div>
+
+            <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
+              <div className="space-y-5">
+                {showEditorGuide && (
+                  <Panel title="TECHNICAL GUIDE">
+                    <div className="grid gap-3 text-sm text-muted-foreground lg:grid-cols-2">
+                      <div className="rounded-md border border-border bg-panel/50 p-3">
+                        <div className="mb-1 font-medium text-foreground">Diffusion vs Ordered</div>
+                        Usa preset come Floyd–Steinberg, Stucki o Sierra per immagini fotografiche e gradienti morbidi. Usa Bayer, Halftone o Threshold per pattern più grafici e leggibili su palette ridotte.
+                      </div>
+                      <div className="rounded-md border border-border bg-panel/50 p-3">
+                        <div className="mb-1 font-medium text-foreground">Pattern Size</div>
+                        Valori piccoli producono texture fitte e pixel-art friendly. Valori alti rendono celle più visibili, utili per halftone, posterizzazione e look stampa.
+                      </div>
+                      <div className="rounded-md border border-border bg-panel/50 p-3">
+                        <div className="mb-1 font-medium text-foreground">Threshold Bias</div>
+                        Bias negativo scurisce e conserva ombre. Bias positivo apre le alte luci e riduce l'inchiostro visivo. Usalo per bilanciare palette molto contrastate.
+                      </div>
+                      <div className="rounded-md border border-border bg-panel/50 p-3">
+                        <div className="mb-1 font-medium text-foreground">Diffusion Amount</div>
+                        Sotto il 40% ottieni look più puliti e posterizzati. Sopra il 70% aumenti dettaglio percepito, ma anche grana e instabilità nei bordi.
+                      </div>
+                      <div className="rounded-md border border-border bg-panel/50 p-3 lg:col-span-2">
+                        <div className="mb-1 font-medium text-foreground">Uso esperto</div>
+                        `Diffusion Weight` controlla quanta energia d'errore viene propagata. `Tonal Protection` limita danni su ombre/luci. `Edge Preservation` evita bordi impastati. `Grain Shaping` rende la grana più organica o più digitale.
+                      </div>
+                    </div>
+                    <label className="mt-4 flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                      <Checkbox
+                        checked={false}
+                        onCheckedChange={(v) => {
+                          if (v === true) {
+                            setShowEditorGuide(false);
+                            if (typeof window !== "undefined") window.localStorage.setItem(ALGORITHM_GUIDE_STORAGE_KEY, "true");
+                          }
+                        }}
+                      />
+                      Non mostrare più questa guida
+                    </label>
+                  </Panel>
+                )}
+
+                <Panel title="ALGORITHM BUILDER">
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <Field label="Algorithm Name">
+                      <Input value={customAlgorithmName} onChange={(e) => setCustomAlgorithmName(e.target.value)} />
+                    </Field>
+                    <Field label="Starting Preset">
+                      <Select value={customAlgorithmBase} onValueChange={(v) => setCustomAlgorithmBase(v as Algorithm)}>
+                        <SelectTrigger className="h-9 bg-panel"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {ALGORITHMS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                    <Field label="Pattern Size" value={`${patternSize}×${patternSize}`}>
+                      <Slider value={[patternSize]} onValueChange={(v) => setPatternSize(v[0])} min={2} max={16} step={1} />
+                    </Field>
+                    <Field label="Threshold Bias" value={`${thresholdBias}`}>
+                      <Slider value={[thresholdBias]} onValueChange={(v) => setThresholdBias(v[0])} min={-100} max={100} step={1} />
+                    </Field>
+                    <Field label="Diffusion Amount" value={`${diffusionAmount}%`}>
+                      <Slider value={[diffusionAmount]} onValueChange={(v) => setDiffusionAmount(v[0])} max={100} step={1} />
+                    </Field>
+                    <label className="flex cursor-pointer items-center justify-between rounded-md border border-border bg-panel/50 p-3 text-sm">
+                      <div>
+                        <div className="font-medium">Uso esperto</div>
+                        <div className="text-xs text-muted-foreground">Mostra controlli professionali di shaping.</div>
+                      </div>
+                      <Checkbox checked={expertAlgorithmMode} onCheckedChange={(v) => setExpertAlgorithmMode(v === true)} />
+                    </label>
+                  </div>
+                  {expertAlgorithmMode && (
+                    <div className="mt-5 grid gap-5 rounded-md border border-border bg-panel/50 p-4 md:grid-cols-2">
+                      <Field label="Diffusion Weight" value={`${diffusionWeight}%`}>
+                        <Slider value={[diffusionWeight]} onValueChange={(v) => setDiffusionWeight(v[0])} max={100} step={1} />
+                      </Field>
+                      <Field label="Tonal Protection" value={`${tonalProtection}%`}>
+                        <Slider value={[tonalProtection]} onValueChange={(v) => setTonalProtection(v[0])} max={100} step={1} />
+                      </Field>
+                      <Field label="Edge Preservation" value={`${edgePreservation}%`}>
+                        <Slider value={[edgePreservation]} onValueChange={(v) => setEdgePreservation(v[0])} max={100} step={1} />
+                      </Field>
+                      <Field label="Grain Shaping" value={`${grainShaping}%`}>
+                        <Slider value={[grainShaping]} onValueChange={(v) => setGrainShaping(v[0])} max={100} step={1} />
+                      </Field>
+                    </div>
+                  )}
+                </Panel>
+              </div>
+
+              <aside className="space-y-5">
+                <Panel title="CUSTOM BLUEPRINT">
+                  <div className="text-xs">
+                    <Info2 label="Name" value={customAlgorithmName || "Untitled"} />
+                    <Info2 label="Base" value={customAlgorithmBase} />
+                    <Info2 label="Pattern" value={`${patternSize}×${patternSize}`} />
+                    <Info2 label="Bias" value={String(thresholdBias)} />
+                    <Info2 label="Diffusion" value={`${diffusionAmount}%`} />
+                    <Info2 label="Expert" value={expertAlgorithmMode ? "Enabled" : "Off"} />
+                    {expertAlgorithmMode && (
+                      <>
+                        <Info2 label="Weight" value={`${diffusionWeight}%`} />
+                        <Info2 label="Tonal" value={`${tonalProtection}%`} />
+                        <Info2 label="Edges" value={`${edgePreservation}%`} />
+                        <Info2 label="Grain" value={`${grainShaping}%`} />
+                      </>
+                    )}
+                    <Button className="mt-3 w-full" size="sm" onClick={saveCustomAlgorithm}>
+                      <Save className="h-4 w-4" /> Salva algoritmo
+                    </Button>
+                    {algorithmSaved && (
+                      <div className="mt-2 rounded border border-cream/30 bg-cream/10 p-2 text-center text-cream">
+                        Salvato e aggiunto al menu.
+                      </div>
+                    )}
+                  </div>
+                </Panel>
+                <Panel title="SAVED CUSTOMS">
+                  <div className="space-y-2 text-xs">
+                    {customAlgorithms.length === 0 ? (
+                      <div className="text-muted-foreground">Nessun algoritmo custom salvato.</div>
+                    ) : customAlgorithms.map((item) => (
+                      <button
+                        key={item.name}
+                        onClick={() => setAlgo(item.name)}
+                        className={cn("w-full rounded border p-2 text-left", algo === item.name ? "border-cream bg-cream/5" : "border-border bg-panel/50 hover:border-cream/40")}
+                      >
+                        <div className="font-medium">{item.name}</div>
+                        <div className="text-muted-foreground">{item.base} · {item.patternSize}×{item.patternSize}</div>
+                      </button>
+                    ))}
+                  </div>
+                </Panel>
+              </aside>
+            </div>
+          </div>
+        ) : activeView === "Palettes" ? (
+          <div className="flex-1 overflow-y-auto p-5">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-wider text-cream">Dither / Palettes</div>
+                <h2 className="mt-1 text-2xl font-semibold">Custom Palette</h2>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  Esplora le palette disponibili, scegli quella attiva e prepara lo spazio per costruire palette custom riutilizzabili.
+                </p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setActiveView("Editor")}>Torna all'Editor</Button>
+            </div>
+
+            <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
+              <div className="space-y-5">
+                <Panel title="PALETTE LIBRARY">
+                  <div className="flex flex-wrap items-center gap-2 pb-4">
+                    {CATEGORIES.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setCategory(c)}
+                        className={cn(
+                          "rounded-md px-3 py-1 text-xs transition-colors",
+                          category === c ? "bg-cream text-cream-foreground" : "bg-panel text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        {c === "Retro Gaming" && "🎮 "}{c}
+                      </button>
+                    ))}
+                    <div className="ml-auto flex items-center gap-2 rounded-md border border-border bg-panel px-2">
+                      <Search className="h-3.5 w-3.5 text-muted-foreground" />
+                      <Input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search palettes..."
+                        className="h-8 w-56 border-0 bg-transparent p-0 text-xs focus-visible:ring-0"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filteredPalettes.map((p) => (
+                      <button
+                        key={p.name}
+                        onClick={() => setPaletteName(p.name)}
+                        className={cn(
+                          "group rounded-md border p-3 text-left transition-colors",
+                          paletteName === p.name ? "border-cream/60 bg-cream/5" : "border-border bg-panel hover:border-cream/40",
+                        )}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="text-sm font-medium">{p.name}</div>
+                            <div className="text-[11px] text-muted-foreground">{p.category} · {p.colors.length} colors</div>
+                          </div>
+                          <Star className={cn("h-3.5 w-3.5", favorites.has(p.name) ? "fill-cream text-cream" : "text-muted-foreground")} />
+                        </div>
+                        <div className="mt-3 flex h-8 overflow-hidden rounded">
+                          {p.colors.slice(0, 12).map((c, i) => (
+                            <div key={i} className="flex-1" style={{ backgroundColor: c }} />
+                          ))}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </Panel>
+              </div>
+
+              <aside className="space-y-5">
+                <Panel title="ACTIVE PALETTE">
+                  <div className="text-xs">
+                    <div
+                      className="mb-3 h-28 rounded-md border border-border"
+                      style={{ background: `linear-gradient(135deg, ${palette.colors.slice(0, 12).join(", ")})` }}
+                    />
+                    <Info2 label="Name" value={palette.name} />
+                    <Info2 label="Category" value={palette.category} />
+                    <Info2 label="Colors" value={String(palette.colors.length)} />
+                    <Info2 label="Bit Depth" value={paletteFixedBitDepth ? `${paletteFixedBitDepth} Bit locked` : "Flexible"} />
+                  </div>
+                </Panel>
+                <Panel title="CUSTOM PALETTE">
+                  <div className="space-y-4 text-xs">
+                    <Field label="Palette Name">
+                      <Input value={customPaletteName} onChange={(e) => setCustomPaletteName(e.target.value)} />
+                    </Field>
+                    <div>
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="font-medium text-foreground">Colors</span>
+                        <Button size="sm" variant="ghost" onClick={addCustomPaletteColor}>Add Color</Button>
+                      </div>
+                      <div className="space-y-2">
+                        {customPaletteColors.map((color, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={color}
+                              onChange={(e) => updateCustomPaletteColor(index, e.target.value)}
+                              className="h-9 w-10 cursor-pointer rounded border border-border bg-panel"
+                            />
+                            <Input value={color} onChange={(e) => updateCustomPaletteColor(index, e.target.value)} className="h-9 font-mono text-xs" />
+                            <Button size="sm" variant="ghost" onClick={() => removeCustomPaletteColor(index)} disabled={customPaletteColors.length <= 2}>Remove</Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="overflow-hidden rounded-md border border-border">
+                      <div className="flex h-10">
+                        {customPaletteColors.map((color, index) => (
+                          <div key={index} className="flex-1" style={{ backgroundColor: color }} />
+                        ))}
+                      </div>
+                    </div>
+                    <Button className="w-full" size="sm" onClick={saveCustomPalette}>
+                      <Save className="h-4 w-4" /> Salva palette
+                    </Button>
+                    {paletteSaved && (
+                      <div className="rounded border border-cream/30 bg-cream/10 p-2 text-center text-cream">
+                        Palette salvata e selezionata.
+                      </div>
+                    )}
+                  </div>
+                </Panel>
+                <Panel title="SAVED CUSTOMS">
+                  <div className="space-y-2 text-xs">
+                    {customPalettes.length === 0 ? (
+                      <div className="text-muted-foreground">Nessuna palette custom salvata.</div>
+                    ) : customPalettes.map((item) => (
+                      <button
+                        key={item.name}
+                        onClick={() => setPaletteName(item.name)}
+                        className={cn("w-full rounded border p-2 text-left", paletteName === item.name ? "border-cream bg-cream/5" : "border-border bg-panel/50 hover:border-cream/40")}
+                      >
+                        <div className="font-medium">{item.name}</div>
+                        <div className="mt-2 flex h-4 overflow-hidden rounded">
+                          {item.colors.map((color, index) => (
+                            <div key={index} className="flex-1" style={{ backgroundColor: color }} />
+                          ))}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </Panel>
+              </aside>
+            </div>
+          </div>
+        ) : activeView === "CRT" ? (
+          <div className="flex-1 overflow-y-auto p-5">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-wider text-cream">Tools / Preview CRT</div>
+                <h2 className="mt-1 text-2xl font-semibold">CRT Effects Lab</h2>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  Simula un monitor CRT con scanline, vignette, curvatura dello schermo, glow fosfori, aberrazione cromatica e rumore analogico.
+                </p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setActiveView("Editor")}>Torna all'Editor</Button>
+            </div>
+
+            <div className="space-y-5">
+              <Panel title="CRT PRESETS">
+                <div className="grid gap-3 text-xs md:grid-cols-3">
+                  <button className="rounded border border-border bg-panel/50 p-3 text-left hover:border-cream/40" onClick={() => { setCrtScanlines(45); setCrtVignette(80); setCrtCurvature(8); setCrtGlow(45); setCrtChromatic(10); setCrtNoise(6); setCrtPreview(true); }}>
+                    <div className="font-medium text-foreground">Arcade Cabinet</div>
+                    <div className="mt-1 text-muted-foreground">Scanline marcate, glow medio e curvatura da cabinato.</div>
+                  </button>
+                  <button className="rounded border border-border bg-panel/50 p-3 text-left hover:border-cream/40" onClick={() => { setCrtScanlines(25); setCrtVignette(55); setCrtCurvature(4); setCrtGlow(25); setCrtChromatic(6); setCrtNoise(12); setCrtPreview(true); }}>
+                    <div className="font-medium text-foreground">Consumer TV</div>
+                    <div className="mt-1 text-muted-foreground">Look domestico più morbido con rumore analogico leggero.</div>
+                  </button>
+                  <button className="rounded border border-border bg-panel/50 p-3 text-left hover:border-cream/40" onClick={() => { setCrtScanlines(60); setCrtVignette(90); setCrtCurvature(14); setCrtGlow(70); setCrtChromatic(22); setCrtNoise(18); setCrtPreview(true); }}>
+                    <div className="font-medium text-foreground">Worn Broadcast</div>
+                    <div className="mt-1 text-muted-foreground">Distorsione più aggressiva, glow forte e shift cromatico visibile.</div>
+                  </button>
+                </div>
+              </Panel>
+
+              <Panel title="EFFECT DIFFERENCES">
+                <div className="grid gap-3 text-xs md:grid-cols-3">
+                  {[
+                    ["Scanline Focus", "Aumenta linee orizzontali e look pixel-through-glass.", 60, 45, 3, 20, 5, 4],
+                    ["Curved Glass", "Evidenzia curvatura, vignette e profondità del tubo.", 30, 85, 18, 35, 8, 8],
+                    ["Analog Drift", "Mostra glow, aberrazione cromatica e rumore del segnale.", 35, 65, 8, 75, 28, 24],
+                  ].map(([title, description, scan, vignette, curve, glow, chroma, analogNoise]) => (
+                    <button
+                      key={title}
+                      className="overflow-hidden rounded-md border border-border bg-panel/50 text-left hover:border-cream/40"
+                      onClick={() => {
+                        setCrtScanlines(Number(scan)); setCrtVignette(Number(vignette)); setCrtCurvature(Number(curve));
+                        setCrtGlow(Number(glow)); setCrtChromatic(Number(chroma)); setCrtNoise(Number(analogNoise)); setCrtPreview(true);
+                      }}
+                    >
+                      <div
+                        className="h-24"
+                        style={{
+                          backgroundImage: `repeating-linear-gradient(0deg, rgba(0,0,0,${Number(scan) / 100}) 0px, rgba(0,0,0,${Number(scan) / 100}) 1px, transparent 1px, transparent 4px), radial-gradient(circle, ${palette.colors[1] ?? "#9bbc0f"}, ${palette.colors[0] ?? "#0f380f"})`,
+                          boxShadow: `inset 0 0 ${Number(vignette)}px rgba(0,0,0,0.85), 0 0 ${Number(glow) / 2}px rgba(154,188,15,0.35)`,
+                          transform: `skewX(${Number(curve) / 12}deg)`,
+                        }}
+                      />
+                      <div className="p-3">
+                        <div className="font-medium text-foreground">{title}</div>
+                        <div className="mt-1 text-muted-foreground">{description}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </Panel>
+
+              <Panel title="CRT PREVIEW">
+                <div className="relative flex min-h-[420px] items-center justify-center overflow-hidden rounded-md bg-black/40 p-5">
+                  <div
+                    className="relative overflow-hidden rounded-xl border border-cream/20 bg-black p-2"
+                    style={{
+                      transform: `perspective(900px) rotateX(${crtCurvature / 8}deg)`,
+                      boxShadow: `0 0 ${crtGlow}px rgba(154,188,15,0.35), inset 0 0 ${crtVignette}px rgba(0,0,0,0.85)`,
+                    }}
+                  >
+                    <canvas
+                      ref={(el) => {
+                        if (el && previewCanvas.current) {
+                          el.width = previewCanvas.current.width;
+                          el.height = previewCanvas.current.height;
+                          const ctx = el.getContext("2d");
+                          if (ctx) ctx.drawImage(previewCanvas.current, 0, 0);
+                        }
+                      }}
+                      className="block max-h-[360px] max-w-full"
+                      style={{
+                        imageRendering: "pixelated",
+                        transform: `scale(${zoom / 100}) skewX(${crtCurvature / 20}deg)`,
+                        filter: `saturate(${1 + crtGlow / 180}) contrast(${1 + crtGlow / 260}) drop-shadow(${crtChromatic / 6}px 0 rgba(255,0,0,0.32)) drop-shadow(-${crtChromatic / 6}px 0 rgba(0,120,255,0.28))`,
+                        transformOrigin: "center",
+                      }}
+                    />
+                    <div
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        backgroundImage: `repeating-linear-gradient(0deg, rgba(0,0,0,${crtScanlines / 100}) 0px, rgba(0,0,0,${crtScanlines / 100}) 1px, transparent 1px, transparent 3px), radial-gradient(circle at center, transparent 45%, rgba(0,0,0,${crtVignette / 100}) 100%)`,
+                        mixBlendMode: "multiply",
+                      }}
+                    />
+                    <div
+                      className="pointer-events-none absolute inset-0 opacity-40"
+                      style={{
+                        backgroundImage: `radial-gradient(circle at 30% 20%, rgba(255,255,255,${crtGlow / 220}), transparent 28%), repeating-linear-gradient(90deg, rgba(255,255,255,${crtNoise / 400}) 0px, transparent 1px, transparent 4px)`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </Panel>
+
+              <Panel
+                title="CRT CONTROLS"
+                right={
+                  <button onClick={() => setShowCrtControls((v) => !v)} className="flex items-center gap-1 rounded border border-border px-2 py-1 text-xs hover:bg-accent">
+                    {showCrtControls ? "Nascondi" : "Mostra"} <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", showCrtControls && "rotate-180")} />
+                  </button>
+                }
+              >
+                {showCrtControls ? (
+                  <div className="space-y-4">
+                    <Row label="Enable CRT" trailing={crtPreview ? "On" : "Off"}>
+                      <Switch checked={crtPreview} onCheckedChange={setCrtPreview} />
+                    </Row>
+                    <Field label="Scanlines" value={`${crtScanlines}%`}>
+                      <Slider value={[crtScanlines]} onValueChange={(v) => setCrtScanlines(v[0])} max={100} step={1} />
+                    </Field>
+                    <Field label="Screen Curvature" value={`${crtCurvature}%`}>
+                      <Slider value={[crtCurvature]} onValueChange={(v) => setCrtCurvature(v[0])} max={30} step={1} />
+                    </Field>
+                    <Field label="Vignette" value={`${crtVignette}%`}>
+                      <Slider value={[crtVignette]} onValueChange={(v) => setCrtVignette(v[0])} max={100} step={1} />
+                    </Field>
+                    <Field label="Phosphor Glow" value={`${crtGlow}%`}>
+                      <Slider value={[crtGlow]} onValueChange={(v) => setCrtGlow(v[0])} max={100} step={1} />
+                    </Field>
+                    <Field label="Chromatic Shift" value={`${crtChromatic}%`}>
+                      <Slider value={[crtChromatic]} onValueChange={(v) => setCrtChromatic(v[0])} max={40} step={1} />
+                    </Field>
+                    <Field label="Analog Noise" value={`${crtNoise}%`}>
+                      <Slider value={[crtNoise]} onValueChange={(v) => setCrtNoise(v[0])} max={50} step={1} />
+                    </Field>
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
+                    Controlli nascosti. Usa la freccetta per abbassare la sezione e modificare manualmente ogni parametro CRT.
+                  </div>
+                )}
+              </Panel>
+            </div>
+          </div>
+        ) : activeView === "Social" ? (
+          <div className="flex-1 overflow-y-auto p-5">
+            <div className="mb-5 flex items-start justify-between gap-4">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-wider text-cream">Workspace / Social</div>
+                <h2 className="mt-1 text-2xl font-semibold">DitherVerse</h2>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  Scopri algoritmi creati dalla community, cerca per colore dominante o trova preset compatibili con il tuo algoritmo preferito.
+                </p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setActiveView("Editor")}>Torna all'Editor</Button>
+            </div>
+
+            <div className="mb-5 flex flex-wrap gap-2">
+              {["PulseDeck", "Color Search", "Algorithm Search"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setSocialTab(tab)}
+                  className={cn("rounded-md px-3 py-1.5 text-xs transition-colors", socialTab === tab ? "bg-cream text-cream-foreground" : "bg-panel text-muted-foreground hover:text-foreground")}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {socialTab === "PulseDeck" && (
+              <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
+                <Panel title="PULSEDECK">
+                  <div className="mx-auto max-w-md">
+                    <div className="relative rounded-[1.75rem] border border-cream/30 bg-panel p-3 shadow-2xl shadow-black/30">
+                      <div className="overflow-hidden rounded-[1.25rem] border border-border bg-background">
+                        <div
+                          className="h-72"
+                          style={{
+                            backgroundImage: `radial-gradient(circle at 25% 20%, ${pulseDeckItem.color}, transparent 30%), repeating-linear-gradient(45deg, ${pulseDeckItem.color} 0 2px, transparent 2px 9px), linear-gradient(135deg, #050505, #202020)`,
+                          }}
+                        >
+                          <div className="flex h-full flex-col justify-between bg-gradient-to-t from-black/90 via-transparent to-black/30 p-5">
+                            <div className="flex justify-between text-xs">
+                              <span className="rounded-full bg-black/50 px-3 py-1 text-cream">Community preset</span>
+                              <span className="rounded-full bg-black/50 px-3 py-1 text-white">{pulseDeckItem.likes} ♥</span>
+                            </div>
+                            <div>
+                              <div className="text-2xl font-bold text-white">{pulseDeckItem.name}</div>
+                              <div className="mt-1 text-sm text-white/70">by @{pulseDeckItem.author} · {pulseDeckItem.base}</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-3 p-4">
+                          <div>
+                            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tags</div>
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {pulseDeckItem.tags.map((tag) => <span key={tag} className="rounded bg-background px-2 py-1 text-[10px] text-muted-foreground">#{tag}</span>)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-5 flex items-center justify-center gap-8">
+                      <button
+                        className="grid h-14 w-14 place-items-center rounded-full border border-border bg-panel text-muted-foreground shadow-lg transition hover:border-red-400 hover:text-red-400"
+                        onClick={() => setPulseDeckIndex((i) => i + 1)}
+                      >
+                        <X className="h-6 w-6" />
+                      </button>
+                      <button
+                        className="grid h-16 w-16 place-items-center rounded-full bg-cream text-cream-foreground shadow-lg transition hover:scale-105"
+                        onClick={() => {
+                          setAlgo(pulseDeckItem.base);
+                          setPulseDeckIndex((i) => i + 1);
+                        }}
+                      >
+                        <Heart className="h-7 w-7 fill-current" />
+                      </button>
+                    </div>
+                    <div className="mt-3 text-center text-xs text-muted-foreground">
+                      Premi X per scartare o cuore per usare il preset base e passare alla prossima carta.
+                    </div>
+                  </div>
+                </Panel>
+                <aside className="space-y-5">
+                  <Panel title="HOW IT WORKS">
+                    <div className="space-y-2 text-xs text-muted-foreground">
+                      <div>PulseDeck mostra una carta alla volta: X scarta, cuore applica il preset base e passa al prossimo algoritmo community.</div>
+                      <div className="rounded border border-border bg-panel/50 p-2">Prossimo step: gesture drag reali, profili utente e import completo della blueprint community.</div>
+                    </div>
+                  </Panel>
+                </aside>
+              </div>
+            )}
+
+            {socialTab === "Color Search" && (
+              <div className="grid gap-5 xl:grid-cols-[320px_1fr]">
+                <Panel title="SEARCH BY COLOR">
+                  <div className="space-y-4 text-xs">
+                    <Field label="Target Color">
+                      <div className="flex gap-2">
+                        <input type="color" value={socialColorSearch} onChange={(e) => setSocialColorSearch(e.target.value)} className="h-9 w-12 rounded border border-border bg-panel" />
+                        <Input value={socialColorSearch} onChange={(e) => setSocialColorSearch(e.target.value)} className="h-9 font-mono text-xs" />
+                      </div>
+                    </Field>
+                    <div className="rounded-md border border-border p-3" style={{ backgroundColor: socialColorSearch }}>
+                      <div className="mix-blend-difference text-white">Dominant color probe</div>
+                    </div>
+                  </div>
+                </Panel>
+                <Panel title="MATCHING COMMUNITY LOOKS">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {SOCIAL_ALGORITHMS.map((item) => (
+                      <button key={item.name} className="rounded-md border border-border bg-panel/50 p-3 text-left hover:border-cream/40" onClick={() => setAlgo(item.base)}>
+                        <div className="mb-2 h-8 rounded" style={{ background: `linear-gradient(90deg, ${socialColorSearch}, ${item.color})` }} />
+                        <div className="font-medium">{item.name}</div>
+                        <div className="text-xs text-muted-foreground">{item.base} · matched against {socialColorSearch}</div>
+                      </button>
+                    ))}
+                  </div>
+                </Panel>
+              </div>
+            )}
+
+            {socialTab === "Algorithm Search" && (
+              <div className="grid gap-5 xl:grid-cols-[320px_1fr]">
+                <Panel title="SEARCH BY ALGORITHM">
+                  <Field label="Algorithm">
+                    <Select value={socialAlgorithmSearch} onValueChange={setSocialAlgorithmSearch}>
+                      <SelectTrigger className="h-9 bg-panel"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {ALGORITHMS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                </Panel>
+                <Panel title="COMMUNITY RESULTS">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {SOCIAL_ALGORITHMS.filter((item) => item.base === socialAlgorithmSearch || socialAlgorithmSearch === "Floyd–Steinberg").map((item) => (
+                      <button key={item.name} className="rounded-md border border-border bg-panel/50 p-3 text-left hover:border-cream/40" onClick={() => setAlgo(item.base)}>
+                        <div className="font-medium">{item.name}</div>
+                        <div className="text-xs text-muted-foreground">Base: {item.base} · @{item.author}</div>
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {item.tags.map((tag) => <span key={tag} className="rounded bg-background px-2 py-1 text-[10px] text-muted-foreground">#{tag}</span>)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </Panel>
+              </div>
+            )}
+          </div>
+        ) : (
         <div className="grid flex-1 grid-cols-[1fr_320px] overflow-hidden">
           <div className="flex flex-col overflow-hidden p-5">
             <div className="grid flex-1 grid-cols-2 gap-5 overflow-hidden">
@@ -221,10 +994,10 @@ function DitherForge() {
               <Panel
                 title="DITHER PREVIEW"
                 right={
-                  <Select value={algo} onValueChange={(v) => setAlgo(v as Algorithm)}>
+                  <Select value={algo} onValueChange={setAlgo}>
                     <SelectTrigger className="h-7 w-44 bg-panel text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {ALGORITHMS.map((a) => <SelectItem key={a} value={a} className="text-xs">{a}</SelectItem>)}
+                      {algorithmOptions.map((a) => <SelectItem key={a} value={a} className="text-xs">{a}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 }
@@ -237,15 +1010,22 @@ function DitherForge() {
                       style={{ imageRendering: "pixelated", transform: `scale(${zoom / 100})`, transformOrigin: "center" }}
                     />
                     {crtPreview && (
-                      <div
-                        className="pointer-events-none absolute inset-0"
-                        style={{
-                          backgroundImage:
-                            "repeating-linear-gradient(0deg, rgba(0,0,0,0.35) 0px, rgba(0,0,0,0.35) 1px, transparent 1px, transparent 3px)",
-                          boxShadow: "inset 0 0 80px 10px rgba(0,0,0,0.7)",
-                          mixBlendMode: "multiply",
-                        }}
-                      />
+                      <>
+                        <div
+                          className="pointer-events-none absolute inset-0"
+                          style={{
+                            backgroundImage: `repeating-linear-gradient(0deg, rgba(0,0,0,${crtScanlines / 100}) 0px, rgba(0,0,0,${crtScanlines / 100}) 1px, transparent 1px, transparent 3px), radial-gradient(circle at center, transparent 45%, rgba(0,0,0,${crtVignette / 100}) 100%)`,
+                            boxShadow: `inset 0 0 ${crtVignette}px 10px rgba(0,0,0,0.7), 0 0 ${crtGlow}px rgba(154,188,15,0.25)`,
+                            mixBlendMode: "multiply",
+                          }}
+                        />
+                        <div
+                          className="pointer-events-none absolute inset-0 opacity-40"
+                          style={{
+                            backgroundImage: `radial-gradient(circle at 30% 20%, rgba(255,255,255,${crtGlow / 220}), transparent 28%), repeating-linear-gradient(90deg, rgba(255,255,255,${crtNoise / 400}) 0px, transparent 1px, transparent 4px)`,
+                          }}
+                        />
+                      </>
                     )}
                     {pixelGrid && (
                       <div
@@ -368,10 +1148,10 @@ function DitherForge() {
           {/* Right inspector */}
           <aside className="flex flex-col gap-4 overflow-y-auto border-l border-border p-5">
             <Field label="Algorithm">
-              <Select value={algo} onValueChange={(v) => setAlgo(v as Algorithm)}>
+              <Select value={algo} onValueChange={setAlgo}>
                 <SelectTrigger className="h-9 bg-panel"><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {ALGORITHMS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                  {algorithmOptions.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
                 </SelectContent>
               </Select>
             </Field>
@@ -381,14 +1161,17 @@ function DitherForge() {
             </Field>
 
             <Field label="Bit Depth">
-              <div className="grid grid-cols-4 gap-1 rounded-md border border-border bg-panel p-1">
-                {([1, 2, 4, 8] as const).map((b) => (
+              <div className="grid grid-cols-5 gap-1 rounded-md border border-border bg-panel p-1">
+                {([1, 2, 4, 8, 16] as const).map((b) => (
                   <button
                     key={b}
+                    disabled={paletteFixedBitDepth !== null && b !== paletteFixedBitDepth}
                     onClick={() => setBitDepth(b)}
                     className={cn(
                       "rounded px-2 py-1 text-xs transition-colors",
-                      bitDepth === b ? "bg-cream text-cream-foreground" : "text-muted-foreground hover:text-foreground",
+                      bitDepth === b && "bg-cream text-cream-foreground",
+                      bitDepth !== b && "text-muted-foreground hover:text-foreground",
+                      paletteFixedBitDepth !== null && b !== paletteFixedBitDepth && "cursor-not-allowed opacity-30 hover:text-muted-foreground",
                     )}
                   >
                     {b} Bit
@@ -397,27 +1180,35 @@ function DitherForge() {
               </div>
             </Field>
 
-            <Field label="Palette">
-              <div className="flex items-center gap-2">
-                <Select value={paletteName} onValueChange={setPaletteName}>
-                  <SelectTrigger className="h-9 bg-panel"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {PALETTES.map((p) => <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <button
-                  onClick={() => setPaletteName(PALETTES[Math.floor(Math.random() * PALETTES.length)].name)}
-                  className="grid h-9 w-9 place-items-center rounded-md border border-border bg-panel text-muted-foreground hover:text-foreground"
-                >
-                  <Shuffle className="h-4 w-4" />
-                </button>
+            <div className="overflow-hidden rounded-md border border-border bg-panel/50">
+              <div className="relative h-24">
+                <div
+                  className="absolute inset-0 opacity-80"
+                  style={{
+                    background: `linear-gradient(135deg, ${palette.colors.slice(0, 8).join(", ")})`,
+                  }}
+                />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.35),transparent_35%),linear-gradient(rgba(0,0,0,0.15)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.15)_1px,transparent_1px)] bg-[length:100%_100%,8px_8px,8px_8px]" />
+                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent p-3">
+                  <div className="text-[11px] font-medium uppercase tracking-wider text-cream">Palette Signal</div>
+                  <div className="truncate text-sm font-semibold">{palette.name}</div>
+                </div>
               </div>
-              <div className="mt-2 flex h-6 overflow-hidden rounded">
-                {palette.colors.slice(0, 8).map((c, i) => (
-                  <div key={i} className="flex-1" style={{ backgroundColor: c }} />
-                ))}
+              <div className="grid grid-cols-3 divide-x divide-border text-center text-xs">
+                <div className="p-2">
+                  <div className="text-muted-foreground">Source</div>
+                  <div className="font-medium">{palette.category}</div>
+                </div>
+                <div className="p-2">
+                  <div className="text-muted-foreground">Colors</div>
+                  <div className="font-medium">{palette.colors.length}</div>
+                </div>
+                <div className="p-2">
+                  <div className="text-muted-foreground">Active</div>
+                  <div className="font-medium">{Math.min(palette.colors.length, Math.pow(2, bitDepth))}</div>
+                </div>
               </div>
-            </Field>
+            </div>
 
             <div className="rounded-md border border-border bg-panel/50 p-3">
               <div className="mb-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -458,6 +1249,7 @@ function DitherForge() {
             </button>
           </aside>
         </div>
+        )}
       </main>
 
       <Dialog open={dialog === "preferences"} onOpenChange={(o) => !o && setDialog(null)}>
@@ -530,7 +1322,7 @@ function DitherForge() {
           </DialogHeader>
           <div className="space-y-2 py-2 text-sm text-muted-foreground">
             <p>Version 0.1 · Built with TanStack Start.</p>
-            <p>{PALETTES.length} palettes · {ALGORITHMS.length} algorithms.</p>
+            <p>{paletteOptions.length} palettes · {algorithmOptions.length} algorithms.</p>
             <p>Convert any image into authentic Game Boy, NES, C64, PICO-8, CRT and broadcast looks.</p>
           </div>
         </DialogContent>
@@ -555,6 +1347,58 @@ function DitherForge() {
             >
               <Download className="h-4 w-4" /> Download PNG
             </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "algorithmWarning"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Sliders className="h-4 w-4" /> Advanced Algorithm Lab</DialogTitle>
+            <DialogDescription>
+              Questa sezione è pensata per un uso esperto: qui potrai creare un algoritmo di dithering personalizzato partendo da preset e parametri manuali.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2 text-sm">
+            <div className="rounded-md border border-cream/30 bg-cream/10 p-3 text-xs text-muted-foreground">
+              Modifiche troppo spinte possono generare pattern aggressivi, perdita di dettaglio o risultati poco prevedibili. Usala come laboratorio creativo.
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+              <Checkbox checked={hideAlgorithmWarning} onCheckedChange={(v) => setHideAlgorithmWarning(v === true)} />
+              Non mostrare più questo avviso
+            </label>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="ghost" size="sm" onClick={() => setDialog(null)}>Annulla</Button>
+              <Button size="sm" onClick={continueToAlgorithmLab}>Continua</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "algorithmGuide"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Info className="h-4 w-4" /> Mini guida Algorithm Lab</DialogTitle>
+            <DialogDescription>
+              Questa guida ti aiuta a scegliere preset e parametri in base al tipo di immagine, palette e risultato visivo desiderato.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2 text-sm">
+            <div className="grid gap-2 text-xs text-muted-foreground">
+              <div className="rounded-md border border-border bg-panel/50 p-3"><span className="font-medium text-foreground">Foto e gradienti:</span> parti da Floyd–Steinberg, Stucki o Sierra. Mantieni `Diffusion Amount` tra 55–80% per preservare dettaglio senza creare troppo rumore.</div>
+              <div className="rounded-md border border-border bg-panel/50 p-3"><span className="font-medium text-foreground">Pixel art e UI:</span> usa Atkinson, Bayer 4x4 o Threshold. Pattern piccoli e bias leggermente negativo aiutano a mantenere silhouette nette.</div>
+              <div className="rounded-md border border-border bg-panel/50 p-3"><span className="font-medium text-foreground">Look stampa / halftone:</span> usa Halftone o Bayer 8x8. Aumenta `Pattern Size` per celle più visibili e riduci la diffusione per evitare grana casuale.</div>
+              <div className="rounded-md border border-border bg-panel/50 p-3"><span className="font-medium text-foreground">Palette ridotte:</span> con 1–2 bit proteggi toni e bordi. Con 8–16 bit puoi spingere diffusione e sharpening perché hai più colori disponibili.</div>
+              <div className="rounded-md border border-border bg-panel/50 p-3"><span className="font-medium text-foreground">Uso esperto:</span> regola peso diffusione, protezione tonale, edge preservation e grain shaping solo dopo aver trovato una base stabile.</div>
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+              <Checkbox checked={hideAlgorithmGuide} onCheckedChange={(v) => setHideAlgorithmGuide(v === true)} />
+              Non mostrare più questa mini guida
+            </label>
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="ghost" size="sm" onClick={() => setDialog(null)}>Chiudi</Button>
+              <Button size="sm" onClick={continueFromAlgorithmGuide}>Apri Algorithm Lab</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

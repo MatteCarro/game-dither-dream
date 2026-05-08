@@ -37,9 +37,9 @@ export const ALGORITHMS = [
   "Stucki",
   "Burkes",
   "Sierra",
+  "Halftone",
   "Bayer 4x4",
   "Bayer 8x8",
-  "Ordered (Halftone)",
   "Threshold",
 ] as const;
 export type Algorithm = (typeof ALGORITHMS)[number];
@@ -85,6 +85,17 @@ const BAYER8 = (() => {
   return m;
 })();
 
+const HALFTONE8 = [
+  [24, 10, 12, 26, 35, 47, 49, 37],
+  [8, 0, 2, 14, 45, 59, 61, 51],
+  [22, 6, 4, 16, 43, 57, 63, 53],
+  [30, 20, 18, 28, 33, 41, 55, 39],
+  [34, 46, 48, 36, 25, 11, 13, 27],
+  [44, 58, 60, 50, 9, 1, 3, 15],
+  [42, 56, 62, 52, 23, 7, 5, 17],
+  [32, 40, 54, 38, 31, 21, 19, 29],
+];
+
 type Diffusion = { divisor: number; matrix: [number, number, number][] };
 const DIFFUSIONS: Record<string, Diffusion> = {
   "Floyd–Steinberg": { divisor: 16, matrix: [[1, 0, 7], [-1, 1, 3], [0, 1, 5], [1, 1, 1]] },
@@ -99,7 +110,7 @@ export function dither(
   src: ImageData,
   paletteHex: string[],
   algo: Algorithm,
-  options: { intensity: number; bitDepth: 1 | 2 | 4 | 8; serpentine: boolean; errorDiffusion: boolean; noise: number; sharpen: number },
+  options: { intensity: number; bitDepth: 1 | 2 | 4 | 8 | 16; serpentine: boolean; errorDiffusion: boolean; noise: number; sharpen: number },
 ): ImageData {
   const { width, height } = src;
   const out = new ImageData(width, height);
@@ -137,10 +148,10 @@ export function dither(
 
   const intensity = options.intensity / 100;
 
-  const isOrdered = algo.startsWith("Bayer") || algo === "Ordered (Halftone)" || algo === "Threshold";
+  const isOrdered = algo.startsWith("Bayer") || algo === "Halftone" || algo === "Threshold";
 
   if (isOrdered) {
-    const matrix = algo === "Bayer 8x8" || algo === "Ordered (Halftone)" ? BAYER8 : BAYER4;
+    const matrix = algo === "Halftone" ? HALFTONE8 : algo === "Bayer 8x8" ? BAYER8 : BAYER4;
     const size = matrix.length;
     const denom = size * size;
     for (let y = 0; y < height; y++) {
