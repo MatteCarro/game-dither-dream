@@ -4,7 +4,7 @@ import {
   Home, Redo2, Undo2, Search, FilePlus2, FolderOpen, Save, Moon,
   Pencil, Layers, Image as ImageIcon, Sliders, Palette as PaletteIcon,
   GitCompare, Monitor, Download, Settings, Keyboard, Info, Play, Grid3x3,
-  Maximize2, Shuffle, Star, ChevronDown, Box,
+  Shuffle, Star, ChevronDown, Box, Sun, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { ALGORITHMS, PALETTES, dither, makeSampleImage, type Algorithm } from "@/lib/dither";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +45,22 @@ function DitherForge() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set(["Game Boy (DMG)"]));
   const [zoom, setZoom] = useState(100);
   const [source, setSource] = useState<ImageData | null>(null);
+  const [crtPreview, setCrtPreview] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [pixelGrid, setPixelGrid] = useState(false);
+  const [activeView, setActiveView] = useState<string>("Editor");
+  const [dialog, setDialog] = useState<null | "preferences" | "shortcuts" | "about" | "comingsoon" | "export">(null);
+  const [comingSoonLabel, setComingSoonLabel] = useState("");
+  const [dark, setDark] = useState(true);
+
+  function openComingSoon(label: string) {
+    setComingSoonLabel(label);
+    setDialog("comingsoon");
+  }
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("light", !dark);
+  }, [dark]);
 
   const palette = useMemo(() => PALETTES.find((p) => p.name === paletteName) ?? PALETTES[0], [paletteName]);
   const sourceCanvas = useRef<HTMLCanvasElement>(null);
@@ -121,23 +140,23 @@ function DitherForge() {
         </div>
         <nav className="flex-1 overflow-y-auto px-3 pb-6 text-sm">
           <SidebarSection label="Workspace">
-            <NavItem icon={Pencil} label="Editor" active />
-            <NavItem icon={Layers} label="Batch Processor" />
-            <NavItem icon={ImageIcon} label="Gallery" />
+            <NavItem icon={Pencil} label="Editor" active={activeView === "Editor"} onClick={() => setActiveView("Editor")} />
+            <NavItem icon={Layers} label="Batch Processor" active={activeView === "Batch Processor"} onClick={() => { setActiveView("Batch Processor"); openComingSoon("Batch Processor"); }} />
+            <NavItem icon={ImageIcon} label="Gallery" active={activeView === "Gallery"} onClick={() => { setActiveView("Gallery"); openComingSoon("Gallery"); }} />
           </SidebarSection>
           <SidebarSection label="Dither">
-            <NavItem icon={Sliders} label="Algorithms" />
-            <NavItem icon={PaletteIcon} label="Palettes" />
+            <NavItem icon={Sliders} label="Algorithms" onClick={() => openComingSoon("Algorithms manager")} />
+            <NavItem icon={PaletteIcon} label="Palettes" onClick={() => openComingSoon("Palette editor")} />
           </SidebarSection>
           <SidebarSection label="Tools">
-            <NavItem icon={GitCompare} label="Compare" />
-            <NavItem icon={Monitor} label="Preview (CRT)" />
-            <NavItem icon={Download} label="Export" />
+            <NavItem icon={GitCompare} label="Compare" active={compareMode} onClick={() => setCompareMode((v) => !v)} />
+            <NavItem icon={Monitor} label="Preview (CRT)" active={crtPreview} onClick={() => setCrtPreview((v) => !v)} />
+            <NavItem icon={Download} label="Export" onClick={() => setDialog("export")} />
           </SidebarSection>
           <SidebarSection label="Settings">
-            <NavItem icon={Settings} label="Preferences" />
-            <NavItem icon={Keyboard} label="Keyboard Shortcuts" />
-            <NavItem icon={Info} label="About" />
+            <NavItem icon={Settings} label="Preferences" onClick={() => setDialog("preferences")} />
+            <NavItem icon={Keyboard} label="Keyboard Shortcuts" onClick={() => setDialog("shortcuts")} />
+            <NavItem icon={Info} label="About" onClick={() => setDialog("about")} />
           </SidebarSection>
         </nav>
       </aside>
@@ -160,7 +179,7 @@ function DitherForge() {
                 {[25, 50, 75, 100, 150, 200, 400].map((z) => <option key={z} value={z}>{z}%</option>)}
               </select>
             </div>
-            <Button variant="ghost" size="sm" className="text-xs">Fit</Button>
+            <Button variant="ghost" size="sm" className="text-xs" onClick={() => setZoom(100)}>Fit</Button>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => setSource(makeSampleImage())}>
@@ -172,7 +191,7 @@ function DitherForge() {
             <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={exportImage}>
               <Save className="h-3.5 w-3.5" /> Save
             </Button>
-            <ToolButton icon={Moon} />
+            <ToolButton icon={dark ? Sun : Moon} onClick={() => setDark((v) => !v)} />
             <input
               ref={fileInput}
               type="file"
@@ -211,19 +230,62 @@ function DitherForge() {
                 }
               >
                 <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-md bg-black/30 p-3">
-                  <canvas
-                    ref={previewCanvas}
-                    className="max-h-full max-w-full"
-                    style={{ imageRendering: "pixelated", transform: `scale(${zoom / 100})` }}
-                  />
+                  <div className="relative">
+                    <canvas
+                      ref={previewCanvas}
+                      className="block max-h-full max-w-full"
+                      style={{ imageRendering: "pixelated", transform: `scale(${zoom / 100})`, transformOrigin: "center" }}
+                    />
+                    {crtPreview && (
+                      <div
+                        className="pointer-events-none absolute inset-0"
+                        style={{
+                          backgroundImage:
+                            "repeating-linear-gradient(0deg, rgba(0,0,0,0.35) 0px, rgba(0,0,0,0.35) 1px, transparent 1px, transparent 3px)",
+                          boxShadow: "inset 0 0 80px 10px rgba(0,0,0,0.7)",
+                          mixBlendMode: "multiply",
+                        }}
+                      />
+                    )}
+                    {pixelGrid && (
+                      <div
+                        className="pointer-events-none absolute inset-0"
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)",
+                          backgroundSize: `${Math.max(2, zoom / 25)}px ${Math.max(2, zoom / 25)}px`,
+                        }}
+                      />
+                    )}
+                    {compareMode && (
+                      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 overflow-hidden border-r-2 border-cream">
+                        <canvas
+                          ref={(el) => {
+                            if (el && source) {
+                              el.width = source.width; el.height = source.height;
+                              el.getContext("2d")!.putImageData(source, 0, 0);
+                            }
+                          }}
+                          className="block max-h-full max-w-full"
+                          style={{ imageRendering: "pixelated", transform: `scale(${zoom / 100})`, transformOrigin: "center" }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
-                    <ToolButton icon={Play} />
-                    <ToolButton icon={Grid3x3} />
-                    <button className="rounded border border-border px-2 py-1 text-xs hover:bg-accent">1:1</button>
+                    <ToolButton icon={Play} onClick={() => setSource(makeSampleImage())} />
+                    <ToolButton icon={Grid3x3} active={pixelGrid} onClick={() => setPixelGrid((v) => !v)} />
+                    <button onClick={() => setZoom(100)} className="rounded border border-border px-2 py-1 text-xs hover:bg-accent">1:1</button>
+                    <button onClick={() => setCompareMode((v) => !v)} className={cn("rounded border px-2 py-1 text-xs hover:bg-accent", compareMode ? "border-cream text-foreground" : "border-border")}>
+                      Compare
+                    </button>
                   </div>
-                  <button className="flex items-center gap-1 rounded border border-border px-2 py-1 hover:bg-accent">
+                  <button
+                    onClick={() => setCrtPreview((v) => !v)}
+                    className={cn("flex items-center gap-1 rounded border px-2 py-1 hover:bg-accent", crtPreview ? "border-cream text-foreground" : "border-border")}
+                  >
                     <Monitor className="h-3.5 w-3.5" /> CRT Preview
                   </button>
                 </div>
@@ -397,6 +459,117 @@ function DitherForge() {
           </aside>
         </div>
       </main>
+
+      <Dialog open={dialog === "preferences"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Preferences</DialogTitle>
+            <DialogDescription>Configure your Dither Forge workspace.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">Dark theme</div>
+                <div className="text-xs text-muted-foreground">Use the dark retro UI.</div>
+              </div>
+              <Switch checked={dark} onCheckedChange={setDark} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">Serpentine scan (default)</div>
+                <div className="text-xs text-muted-foreground">Alternate scan direction per row.</div>
+              </div>
+              <Switch checked={serpentine} onCheckedChange={setSerpentine} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">Error diffusion</div>
+                <div className="text-xs text-muted-foreground">Spread quantization error to neighbors.</div>
+              </div>
+              <Switch checked={errorDiffusion} onCheckedChange={setErrorDiffusion} />
+            </div>
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-sm font-medium">Default intensity</span>
+                <span className="text-xs text-muted-foreground">{intensity}%</span>
+              </div>
+              <Slider value={[intensity]} onValueChange={(v) => setIntensity(v[0])} max={100} step={1} />
+            </div>
+            <div className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
+              <Sparkles className="mr-1 inline h-3 w-3" /> Cloud sync, custom hotkeys & color profiles — coming soon.
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "shortcuts"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Keyboard Shortcuts</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1 py-2 text-sm">
+            {[
+              ["Open file", "⌘ O"], ["Save / Export", "⌘ S"], ["New project", "⌘ N"],
+              ["Toggle CRT preview", "C"], ["Toggle pixel grid", "G"], ["Toggle compare", "K"],
+              ["Reset zoom (1:1)", "0"], ["Random palette", "R"],
+            ].map(([k, v]) => (
+              <div key={k} className="flex items-center justify-between border-b border-border/50 py-1.5">
+                <span className="text-muted-foreground">{k}</span>
+                <kbd className="rounded border border-border bg-panel px-2 py-0.5 font-mono text-xs">{v}</kbd>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "about"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>About Dither Forge</DialogTitle>
+            <DialogDescription>Retro pixel dithering studio inspired by classic consoles & home computers.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2 text-sm text-muted-foreground">
+            <p>Version 0.1 · Built with TanStack Start.</p>
+            <p>{PALETTES.length} palettes · {ALGORITHMS.length} algorithms.</p>
+            <p>Convert any image into authentic Game Boy, NES, C64, PICO-8, CRT and broadcast looks.</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "export"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Image</DialogTitle>
+            <DialogDescription>Save the dithered preview as a PNG file.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-sm">
+            <div className="rounded-md border border-border bg-panel/50 p-3 text-xs">
+              <Info2 label="Resolution" value={source ? `${source.width} × ${source.height}` : "—"} />
+              <Info2 label="Palette" value={palette.name} />
+              <Info2 label="Algorithm" value={algo} />
+              <Info2 label="Bit Depth" value={`${bitDepth} Bit`} />
+            </div>
+            <button
+              onClick={() => { exportImage(); setDialog(null); }}
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-cream py-2.5 text-sm font-semibold text-cream-foreground hover:opacity-90"
+            >
+              <Download className="h-4 w-4" /> Download PNG
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "comingsoon"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> {comingSoonLabel}</DialogTitle>
+            <DialogDescription>Coming soon.</DialogDescription>
+          </DialogHeader>
+          <p className="py-2 text-sm text-muted-foreground">
+            This feature is on the roadmap. In the meantime keep using the Editor — palettes, algorithms, CRT preview and compare mode are all live.
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -412,9 +585,10 @@ function SidebarSection({ label, children }: { label: string; children: React.Re
   );
 }
 
-function NavItem({ icon: Icon, label, active }: { icon: React.ComponentType<{ className?: string }>; label: string; active?: boolean }) {
+function NavItem({ icon: Icon, label, active, onClick }: { icon: React.ComponentType<{ className?: string }>; label: string; active?: boolean; onClick?: () => void }) {
   return (
     <button
+      onClick={onClick}
       className={cn(
         "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
         active ? "bg-panel text-foreground" : "text-muted-foreground hover:bg-panel/60 hover:text-foreground",
@@ -426,9 +600,15 @@ function NavItem({ icon: Icon, label, active }: { icon: React.ComponentType<{ cl
   );
 }
 
-function ToolButton({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
+function ToolButton({ icon: Icon, onClick, active }: { icon: React.ComponentType<{ className?: string }>; onClick?: () => void; active?: boolean }) {
   return (
-    <button className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-panel hover:text-foreground">
+    <button
+      onClick={onClick}
+      className={cn(
+        "grid h-8 w-8 place-items-center rounded-md hover:bg-panel hover:text-foreground",
+        active ? "bg-panel text-foreground" : "text-muted-foreground",
+      )}
+    >
       <Icon className="h-4 w-4" />
     </button>
   );
