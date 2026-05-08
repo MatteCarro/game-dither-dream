@@ -300,10 +300,8 @@ function DitherForge() {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
-      const max = 480;
-      const scale = Math.min(1, max / Math.max(img.width, img.height));
-      const w = Math.round(img.width * scale);
-      const h = Math.round(img.height * scale);
+      const w = img.width;
+      const h = img.height;
       const c = document.createElement("canvas");
       c.width = w; c.height = h;
       const ctx = c.getContext("2d")!;
@@ -317,10 +315,8 @@ function DitherForge() {
   function captureVideoFrame() {
     const video = videoElement.current;
     if (!video || video.videoWidth === 0 || video.videoHeight === 0) return;
-    const max = 480;
-    const scale = Math.min(1, max / Math.max(video.videoWidth, video.videoHeight));
-    const w = Math.max(1, Math.round(video.videoWidth * scale));
-    const h = Math.max(1, Math.round(video.videoHeight * scale));
+    const w = video.videoWidth;
+    const h = video.videoHeight;
     const c = document.createElement("canvas");
     c.width = w;
     c.height = h;
