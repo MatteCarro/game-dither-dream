@@ -230,19 +230,62 @@ function DitherForge() {
                 }
               >
                 <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-md bg-black/30 p-3">
-                  <canvas
-                    ref={previewCanvas}
-                    className="max-h-full max-w-full"
-                    style={{ imageRendering: "pixelated", transform: `scale(${zoom / 100})` }}
-                  />
+                  <div className="relative">
+                    <canvas
+                      ref={previewCanvas}
+                      className="block max-h-full max-w-full"
+                      style={{ imageRendering: "pixelated", transform: `scale(${zoom / 100})`, transformOrigin: "center" }}
+                    />
+                    {crtPreview && (
+                      <div
+                        className="pointer-events-none absolute inset-0"
+                        style={{
+                          backgroundImage:
+                            "repeating-linear-gradient(0deg, rgba(0,0,0,0.35) 0px, rgba(0,0,0,0.35) 1px, transparent 1px, transparent 3px)",
+                          boxShadow: "inset 0 0 80px 10px rgba(0,0,0,0.7)",
+                          mixBlendMode: "multiply",
+                        }}
+                      />
+                    )}
+                    {pixelGrid && (
+                      <div
+                        className="pointer-events-none absolute inset-0"
+                        style={{
+                          backgroundImage:
+                            "linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)",
+                          backgroundSize: `${Math.max(2, zoom / 25)}px ${Math.max(2, zoom / 25)}px`,
+                        }}
+                      />
+                    )}
+                    {compareMode && (
+                      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/2 overflow-hidden border-r-2 border-cream">
+                        <canvas
+                          ref={(el) => {
+                            if (el && source) {
+                              el.width = source.width; el.height = source.height;
+                              el.getContext("2d")!.putImageData(source, 0, 0);
+                            }
+                          }}
+                          className="block max-h-full max-w-full"
+                          style={{ imageRendering: "pixelated", transform: `scale(${zoom / 100})`, transformOrigin: "center" }}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center justify-between pt-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
-                    <ToolButton icon={Play} />
-                    <ToolButton icon={Grid3x3} />
-                    <button className="rounded border border-border px-2 py-1 text-xs hover:bg-accent">1:1</button>
+                    <ToolButton icon={Play} onClick={() => setSource(makeSampleImage())} />
+                    <ToolButton icon={Grid3x3} active={pixelGrid} onClick={() => setPixelGrid((v) => !v)} />
+                    <button onClick={() => setZoom(100)} className="rounded border border-border px-2 py-1 text-xs hover:bg-accent">1:1</button>
+                    <button onClick={() => setCompareMode((v) => !v)} className={cn("rounded border px-2 py-1 text-xs hover:bg-accent", compareMode ? "border-cream text-foreground" : "border-border")}>
+                      Compare
+                    </button>
                   </div>
-                  <button className="flex items-center gap-1 rounded border border-border px-2 py-1 hover:bg-accent">
+                  <button
+                    onClick={() => setCrtPreview((v) => !v)}
+                    className={cn("flex items-center gap-1 rounded border px-2 py-1 hover:bg-accent", crtPreview ? "border-cream text-foreground" : "border-border")}
+                  >
                     <Monitor className="h-3.5 w-3.5" /> CRT Preview
                   </button>
                 </div>
