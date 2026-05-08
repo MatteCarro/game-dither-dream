@@ -19,7 +19,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
-import { ALGORITHMS, PALETTES, dither, makeSampleImage, type Algorithm, type Palette } from "@/lib/dither";
+import { ALGORITHMS, PALETTES, makeSampleImage, dither, preprocessImage } from "@/lib/dither";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -99,6 +99,14 @@ function DitherForge() {
   const [videoShadows, setVideoShadows] = useState(0);
   const [videoTemperature, setVideoTemperature] = useState(0);
   const [videoPixelSize, setVideoPixelSize] = useState(1);
+  const [imageBrightness, setImageBrightness] = useState(100);
+  const [imageContrast, setImageContrast] = useState(100);
+  const [imageSaturation, setImageSaturation] = useState(100);
+  const [imageGamma, setImageGamma] = useState(100);
+  const [imageHighlights, setImageHighlights] = useState(0);
+  const [imageShadows, setImageShadows] = useState(0);
+  const [imageTemperature, setImageTemperature] = useState(0);
+  const [imageBlur, setImageBlur] = useState(0);
   const [socialTab, setSocialTab] = useState("PulseDeck");
   const [pulseDeckIndex, setPulseDeckIndex] = useState(0);
   const [pulseSwipeDirection, setPulseSwipeDirection] = useState<null | "left" | "right">(null);
@@ -291,7 +299,17 @@ function DitherForge() {
   // dither
   useEffect(() => {
     if (!source || !previewCanvas.current) return;
-    const out = dither(source, palette.colors, renderAlgorithm, {
+    const processed = preprocessImage(source, {
+      brightness: imageBrightness,
+      contrast: imageContrast,
+      saturation: imageSaturation,
+      gamma: imageGamma,
+      highlights: imageHighlights,
+      shadows: imageShadows,
+      temperature: imageTemperature,
+      blur: imageBlur,
+    });
+    const out = dither(processed, palette.colors, renderAlgorithm, {
       intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen,
     });
     const c = previewCanvas.current;
@@ -316,7 +334,7 @@ function DitherForge() {
       c.width = out.width; c.height = out.height;
       c.getContext("2d")!.putImageData(out, 0, 0);
     }
-  }, [source, palette, renderAlgorithm, intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen, pixelSize]);
+  }, [source, palette, renderAlgorithm, intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen, pixelSize, imageBrightness, imageContrast, imageSaturation, imageGamma, imageHighlights, imageShadows, imageTemperature, imageBlur]);
 
   function loadFile(file: File) {
     const url = URL.createObjectURL(file);
@@ -1923,6 +1941,36 @@ function DitherForge() {
                   <div className="font-medium">{Math.min(palette.colors.length, Math.pow(2, bitDepth))}</div>
                 </div>
               </div>
+            </div>
+
+            <div className="rounded-md border border-border bg-panel/50 p-3">
+              <div className="mb-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                Image Tone
+              </div>
+              <Row label="Brightness" trailing={`${imageBrightness}%`}>
+                <Slider value={[imageBrightness]} onValueChange={(v) => setImageBrightness(v[0])} min={50} max={150} step={1} className="w-32" />
+              </Row>
+              <Row label="Contrast" trailing={`${imageContrast}%`}>
+                <Slider value={[imageContrast]} onValueChange={(v) => setImageContrast(v[0])} min={50} max={170} step={1} className="w-32" />
+              </Row>
+              <Row label="Saturation" trailing={`${imageSaturation}%`}>
+                <Slider value={[imageSaturation]} onValueChange={(v) => setImageSaturation(v[0])} min={0} max={180} step={1} className="w-32" />
+              </Row>
+              <Row label="Gamma" trailing={`${imageGamma}%`}>
+                <Slider value={[imageGamma]} onValueChange={(v) => setImageGamma(v[0])} min={60} max={180} step={1} className="w-32" />
+              </Row>
+              <Row label="Highlights" trailing={`${imageHighlights > 0 ? "+" : ""}${imageHighlights}%`}>
+                <Slider value={[imageHighlights]} onValueChange={(v) => setImageHighlights(v[0])} min={-40} max={40} step={1} className="w-32" />
+              </Row>
+              <Row label="Shadows" trailing={`${imageShadows > 0 ? "+" : ""}${imageShadows}%`}>
+                <Slider value={[imageShadows]} onValueChange={(v) => setImageShadows(v[0])} min={-40} max={40} step={1} className="w-32" />
+              </Row>
+              <Row label="Temperature" trailing={`${imageTemperature > 0 ? "+" : ""}${imageTemperature}%`}>
+                <Slider value={[imageTemperature]} onValueChange={(v) => setImageTemperature(v[0])} min={-50} max={50} step={1} className="w-32" />
+              </Row>
+              <Row label="Blur" trailing={`${imageBlur}px`}>
+                <Slider value={[imageBlur]} onValueChange={(v) => setImageBlur(v[0])} min={0} max={5} step={0.5} className="w-32" />
+              </Row>
             </div>
 
             <div className="rounded-md border border-border bg-panel/50 p-3">

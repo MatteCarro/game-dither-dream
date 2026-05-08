@@ -37,9 +37,12 @@ export const ALGORITHMS = [
   "Stucki",
   "Burkes",
   "Sierra",
+  "Sierra-2",
+  "Sierra Lite",
   "Halftone",
   "Bayer 4x4",
   "Bayer 8x8",
+  "Bayer 16x16",
   "Threshold",
 ] as const;
 export type Algorithm = (typeof ALGORITHMS)[number];
@@ -49,12 +52,127 @@ const hexToRgb = (h: string) => {
   return [parseInt(c.slice(0, 2), 16), parseInt(c.slice(2, 4), 16), parseInt(c.slice(4, 6), 16)] as [number, number, number];
 };
 
-function nearest(palette: number[][], r: number, g: number, b: number) {
+function applyBlur(data: Float32Array, width: number, height: number, radius: number): Float32Array {
+  if (radius <= 0) return data;
+  const out = new Float32Array(data.length);
+  const r = Math.max(1, Math.round(radius));
+  const size = r * 2 + 1;
+  const area = size * size;
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      let sr = 0, sg = 0, sb = 0;
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          const ny = Math.min(height - 1, Math.max(0, y + dy));
+          const nx = Math.min(width - 1, Math.max(0, x + dx));
+          const j = (ny * width + nx) * 4;
+          sr += data[j]; sg += data[j + 1]; sb += data[j + 2];
+        }
+      }
+      const i = (y * width + x) * 4;
+      out[i] = sr / area; out[i + 1] = sg / area; out[i + 2] = sb / area;
+      out[i + 3] = data[i + 3];
+    }
+  }
+  return out;
+}
+
+export function preprocessImage(
+  src: ImageData,
+  options: {
+    brightness?: number;
+    contrast?: number;
+    saturation?: number;
+    gamma?: number;
+    highlights?: number;
+    shadows?: number;
+    temperature?: number;
+    blur?: number;
+  }
+): ImageData {
+  const { width, height } = src;
+  let data: Float32Array = new Float32Array(src.data.length);
+  for (let i = 0; i < src.data.length; i++) data[i] = src.data[i];
+
+  if (options.blur && options.blur > 0) {
+    data = applyBlur(data, width, height, options.blur);
+  }
+
+  const out = new ImageData(width, height);
+  for (let i = 0; i < data.length; i += 4) {
+    let r = data[i] / 255;
+    let g = data[i + 1] / 255;
+    let b = data[i + 2] / 255;
+
+    if (options.brightness !== undefined && options.brightness !== 100) {
+      const br = options.brightness / 100;
+      r *= br; g *= br; b *= br;
+    }
+
+    if (options.contrast !== undefined && options.contrast !== 100) {
+      const c = options.contrast / 100;
+      r = (r - 0.5) * c + 0.5;
+      g = (g - 0.5) * c + 0.5;
+      b = (b - 0.5) * c + 0.5;
+    }
+
+    if (options.gamma !== undefined && options.gamma !== 100) {
+      const gma = Math.max(0.1, options.gamma / 100);
+      r = Math.pow(Math.max(0, r), gma);
+      g = Math.pow(Math.max(0, g), gma);
+      b = Math.pow(Math.max(0, b), gma);
+    }
+
+    if (options.saturation !== undefined && options.saturation !== 100) {
+      const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+      const s = options.saturation / 100;
+      r = lum + (r - lum) * s;
+      g = lum + (g - lum) * s;
+      b = lum + (b - lum) * s;
+    }
+
+    if (options.shadows !== undefined || options.highlights !== undefined) {
+      const shadows = (options.shadows || 0) / 100;
+      const highlights = (options.highlights || 0) / 100;
+      const tone = (v: number) => {
+        let out = v;
+        if (shadows > 0) out = out + shadows * (1 - out) * (1 - out);
+        else if (shadows < 0) out = out * (1 + shadows * (1 - out));
+        if (highlights > 0) out = out * (1 - highlights * out * out);
+        else if (highlights < 0) out = out + (-highlights) * out * out * (1 - out);
+        return out;
+      };
+      r = tone(r); g = tone(g); b = tone(b);
+    }
+
+    if (options.temperature !== undefined && options.temperature !== 0) {
+      const temp = options.temperature / 100;
+      r += temp * 0.15;
+      b -= temp * 0.15;
+    }
+
+    out.data[i] = Math.max(0, Math.min(255, Math.round(r * 255)));
+    out.data[i + 1] = Math.max(0, Math.min(255, Math.round(g * 255)));
+    out.data[i + 2] = Math.max(0, Math.min(255, Math.round(b * 255)));
+    out.data[i + 3] = 255;
+  }
+  return out;
+}
+
+function nearest(palette: number[][], r: number, g: number, b: number, colorGamma = 2.2) {
+  const gma = Math.max(0.1, colorGamma);
+  const rg = Math.pow(r / 255, gma);
+  const gg = Math.pow(g / 255, gma);
+  const bg = Math.pow(b / 255, gma);
   let best = 0, bd = Infinity;
   for (let i = 0; i < palette.length; i++) {
     const [pr, pg, pb] = palette[i];
-    const d = (pr - r) ** 2 + (pg - g) ** 2 + (pb - b) ** 2;
-    if (d < bd) { bd = d; best = i; }
+    const prg = Math.pow(pr / 255, gma);
+    const pgg = Math.pow(pg / 255, gma);
+    const pbg = Math.pow(pb / 255, gma);
+    const d = (prg - rg) ** 2 + (pgg - gg) ** 2 + (pbg - bg) ** 2;
+    if (d < bd - 1e-9) { bd = d; best = i; }
+    else if (Math.abs(d - bd) < 1e-9 && Math.random() > 0.5) { best = i; }
   }
   return palette[best];
 }
@@ -66,21 +184,29 @@ const BAYER4 = [
   [15, 7, 13, 5],
 ];
 const BAYER8 = (() => {
+  const m4 = BAYER4;
   const m: number[][] = Array.from({ length: 8 }, () => Array(8).fill(0));
-  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
-    let v = 0, mask = 4;
-    for (let i = 0; i < 3; i++) {
-      const bx = (x >> i) & 1, by = (y >> i) & 1;
-      v |= ((bx ^ by) | (by << 1)) << (2 * (2 - i)) >> 0;
-      mask = mask;
+  for (let y = 0; y < 4; y++) {
+    for (let x = 0; x < 4; x++) {
+      m[y][x] = m4[y][x] * 4 + 0;
+      m[y][x + 4] = m4[y][x] * 4 + 2;
+      m[y + 4][x] = m4[y][x] * 4 + 3;
+      m[y + 4][x + 4] = m4[y][x] * 4 + 1;
     }
-    // standard formula
-    let n = 0;
-    for (let i = 0; i < 3; i++) {
-      const bx = (x >> i) & 1, by = (y >> i) & 1;
-      n = n * 4 + ((3 * bx) ^ by) + by * 2 - (3 * bx * by);
+  }
+  return m;
+})();
+
+const BAYER16 = (() => {
+  const m8 = BAYER8;
+  const m: number[][] = Array.from({ length: 16 }, () => Array(16).fill(0));
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      m[y][x] = m8[y][x] * 4 + 0;
+      m[y][x + 8] = m8[y][x] * 4 + 2;
+      m[y + 8][x] = m8[y][x] * 4 + 3;
+      m[y + 8][x + 8] = m8[y][x] * 4 + 1;
     }
-    m[y][x] = n & 63;
   }
   return m;
 })();
@@ -104,13 +230,15 @@ const DIFFUSIONS: Record<string, Diffusion> = {
   Stucki: { divisor: 42, matrix: [[1,0,8],[2,0,4],[-2,1,2],[-1,1,4],[0,1,8],[1,1,4],[2,1,2],[-2,2,1],[-1,2,2],[0,2,4],[1,2,2],[2,2,1]] },
   Burkes: { divisor: 32, matrix: [[1,0,8],[2,0,4],[-2,1,2],[-1,1,4],[0,1,8],[1,1,4],[2,1,2]] },
   Sierra: { divisor: 32, matrix: [[1,0,5],[2,0,3],[-2,1,2],[-1,1,4],[0,1,5],[1,1,4],[2,1,2],[-1,2,2],[0,2,3],[1,2,2]] },
+  "Sierra-2": { divisor: 16, matrix: [[1,0,4],[2,0,3],[-2,1,1],[-1,1,2],[0,1,3],[1,1,2],[2,1,1]] },
+  "Sierra Lite": { divisor: 4, matrix: [[1,0,2],[-1,1,1],[0,1,1]] },
 };
 
 export function dither(
   src: ImageData,
   paletteHex: string[],
   algo: Algorithm,
-  options: { intensity: number; bitDepth: 1 | 2 | 4 | 8 | 16; serpentine: boolean; errorDiffusion: boolean; noise: number; sharpen: number },
+  options: { intensity: number; bitDepth: 1 | 2 | 4 | 8 | 16; serpentine: boolean; errorDiffusion: boolean; noise: number; sharpen: number; colorGamma?: number },
 ): ImageData {
   const { width, height } = src;
   const out = new ImageData(width, height);
@@ -151,7 +279,7 @@ export function dither(
   const isOrdered = algo.startsWith("Bayer") || algo === "Halftone" || algo === "Threshold";
 
   if (isOrdered) {
-    const matrix = algo === "Halftone" ? HALFTONE8 : algo === "Bayer 8x8" ? BAYER8 : BAYER4;
+    const matrix = algo === "Halftone" ? HALFTONE8 : algo === "Bayer 16x16" ? BAYER16 : algo === "Bayer 8x8" ? BAYER8 : BAYER4;
     const size = matrix.length;
     const denom = size * size;
     for (let y = 0; y < height; y++) {
@@ -161,7 +289,7 @@ export function dither(
         const r = Math.max(0, Math.min(255, data[i] + t));
         const g = Math.max(0, Math.min(255, data[i + 1] + t));
         const b = Math.max(0, Math.min(255, data[i + 2] + t));
-        const [nr, ng, nb] = nearest(palette, r, g, b);
+        const [nr, ng, nb] = nearest(palette, r, g, b, options.colorGamma);
         out.data[i] = nr; out.data[i + 1] = ng; out.data[i + 2] = nb; out.data[i + 3] = 255;
       }
     }
@@ -179,7 +307,7 @@ export function dither(
       const r = Math.max(0, Math.min(255, data[i]));
       const g = Math.max(0, Math.min(255, data[i + 1]));
       const b = Math.max(0, Math.min(255, data[i + 2]));
-      const [nr, ng, nb] = nearest(palette, r, g, b);
+      const [nr, ng, nb] = nearest(palette, r, g, b, options.colorGamma);
       out.data[i] = nr; out.data[i + 1] = ng; out.data[i + 2] = nb; out.data[i + 3] = 255;
       if (!options.errorDiffusion) continue;
       const er = (r - nr) * intensity, eg = (g - ng) * intensity, eb = (b - nb) * intensity;
