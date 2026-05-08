@@ -13,6 +13,21 @@ export const PALETTES: Palette[] = [
   { name: "EGA", category: "Computers", colors: ["#000000","#0000aa","#00aa00","#00aaaa","#aa0000","#aa00aa","#aa5500","#aaaaaa","#555555","#5555ff","#55ff55","#55ffff","#ff5555","#ff55ff","#ffff55","#ffffff"] },
   { name: "PICO-8", category: "Retro Gaming", colors: ["#000000","#1d2b53","#7e2553","#008751","#ab5236","#5f574f","#c2c3c7","#fff1e8","#ff004d","#ffa300","#ffec27","#00e436","#29adff","#83769c","#ff77a8","#ffccaa"] },
   { name: "TV Composite", category: "TV / Monitors", colors: ["#000000","#222222","#444444","#666666","#888888","#aaaaaa","#cccccc","#ffffff"] },
+  { name: "CRT Phosphor Green", category: "TV / Monitors", colors: ["#001100","#003300","#006622","#00aa44","#22dd66","#66ff99","#aaffcc","#e6ffe6"] },
+  { name: "CRT Amber", category: "TV / Monitors", colors: ["#1a0a00","#3a1a00","#663300","#996600","#cc9900","#ffbb33","#ffd680","#fff0cc"] },
+  { name: "NTSC Broadcast", category: "TV / Monitors", colors: ["#000000","#1d1d1d","#3b3b3b","#5a5a5a","#787878","#969696","#b4b4b4","#d2d2d2","#f0f0f0","#5e2e1c","#3a5e1c","#1c3a5e","#5e1c3a","#1c5e3a","#3a1c5e","#5e5e1c"] },
+  { name: "PAL Broadcast", category: "TV / Monitors", colors: ["#000000","#202020","#404040","#606060","#808080","#a0a0a0","#c0c0c0","#e0e0e0","#ffffff","#7a3030","#307a30","#30307a","#7a7a30","#7a307a","#307a7a","#a04040"] },
+  { name: "Trinitron", category: "TV / Monitors", colors: ["#0a0a0a","#222222","#444444","#777777","#aaaaaa","#dddddd","#ffffff","#ff3030","#30ff30","#3030ff"] },
+  { name: "Plasma Burn", category: "TV / Monitors", colors: ["#000000","#330011","#660033","#992255","#cc4477","#ee77aa","#ffaadd","#ffe0f0"] },
+  { name: "MS-DOS CGA", category: "Computers", colors: ["#000000","#55ffff","#ff55ff","#ffffff"] },
+  { name: "MS-DOS CGA Mode 0", category: "Computers", colors: ["#000000","#00aa00","#aa0000","#aa5500"] },
+  { name: "VGA 16", category: "Computers", colors: ["#000000","#0000aa","#00aa00","#00aaaa","#aa0000","#aa00aa","#aa5500","#aaaaaa","#555555","#5555ff","#55ff55","#55ffff","#ff5555","#ff55ff","#ffff55","#ffffff"] },
+  { name: "Macintosh 1-bit", category: "Computers", colors: ["#000000","#ffffff"] },
+  { name: "Macintosh 4-bit", category: "Computers", colors: ["#ffffff","#fbf305","#ff6403","#dd0907","#f20884","#4700a5","#0000d3","#02abea","#1fb714","#006412","#562c05","#90713a","#c0c0c0","#808080","#404040","#000000"] },
+  { name: "Atari ST", category: "Computers", colors: ["#000000","#202020","#404040","#606060","#808080","#a0a0a0","#c0c0c0","#ffffff","#a00000","#00a000","#0000a0","#a0a000","#a000a0","#00a0a0","#e08000","#0080e0"] },
+  { name: "MSX", category: "Computers", colors: ["#000000","#010101","#3eb849","#74d07d","#5955e0","#8076f1","#b95e51","#65dbef","#db6559","#ff897d","#ccc35e","#ded087","#3aa241","#b766b5","#cccccc","#ffffff"] },
+  { name: "BBC Micro", category: "Computers", colors: ["#000000","#ff0000","#00ff00","#ffff00","#0000ff","#ff00ff","#00ffff","#ffffff"] },
+  { name: "TRS-80", category: "Computers", colors: ["#000000","#404040","#808080","#c0c0c0","#ffffff","#00aa44"] },
 ];
 
 export const ALGORITHMS = [
