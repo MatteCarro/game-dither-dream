@@ -5,7 +5,7 @@ import {
   Pencil, Layers, Image as ImageIcon, Sliders, Palette as PaletteIcon,
   GitCompare, Monitor, Download, Settings, Keyboard, Info, Play, Grid3x3,
   Star, ChevronDown, Box, Sun, Sparkles, Share2,
-  X, Heart,
+  X, Heart, Clapperboard, Pause,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -54,6 +54,7 @@ const SOCIAL_ALGORITHMS = [
   { name: "Arcade Ink Storm", author: "arcade_luca", base: "Halftone", color: "#ff004d", tags: ["halftone", "print", "bold"], likes: 211 },
   { name: "Pocket LCD Mist", author: "dmg_sara", base: "Bayer 4x4", color: "#9bbc0f", tags: ["gameboy", "green", "ordered"], likes: 177 },
 ];
+const SOCIAL_DECK_SIZE = 20;
 
 function DitherForge() {
   const [algo, setAlgo] = useState<string>("Floyd–Steinberg");
@@ -80,11 +81,28 @@ function DitherForge() {
   const [compareMode, setCompareMode] = useState(false);
   const [pixelGrid, setPixelGrid] = useState(false);
   const [activeView, setActiveView] = useState<string>("Editor");
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoName, setVideoName] = useState("");
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [videoCurrentTime, setVideoCurrentTime] = useState(0);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+  const [videoExporting, setVideoExporting] = useState(false);
+  const [videoExportSize, setVideoExportSize] = useState("original");
+  const [videoBrightness, setVideoBrightness] = useState(100);
+  const [videoContrast, setVideoContrast] = useState(100);
+  const [videoSaturation, setVideoSaturation] = useState(100);
+  const [videoGamma, setVideoGamma] = useState(100);
+  const [videoHighlights, setVideoHighlights] = useState(0);
+  const [videoShadows, setVideoShadows] = useState(0);
+  const [videoTemperature, setVideoTemperature] = useState(0);
+  const [videoPixelSize, setVideoPixelSize] = useState(1);
   const [socialTab, setSocialTab] = useState("PulseDeck");
   const [pulseDeckIndex, setPulseDeckIndex] = useState(0);
+  const [pulseSwipeDirection, setPulseSwipeDirection] = useState<null | "left" | "right">(null);
+  const [pulseSwipeActive, setPulseSwipeActive] = useState(false);
   const [socialColorSearch, setSocialColorSearch] = useState("#29adff");
   const [socialAlgorithmSearch, setSocialAlgorithmSearch] = useState("Floyd–Steinberg");
-  const [dialog, setDialog] = useState<null | "preferences" | "shortcuts" | "about" | "comingsoon" | "export" | "algorithmWarning" | "algorithmGuide">(null);
+  const [dialog, setDialog] = useState<null | "preferences" | "shortcuts" | "about" | "comingsoon" | "export" | "videoExport" | "algorithmWarning" | "algorithmGuide">(null);
   const [comingSoonLabel, setComingSoonLabel] = useState("");
   const [dark, setDark] = useState(true);
   const [hideAlgorithmWarning, setHideAlgorithmWarning] = useState(false);
@@ -157,6 +175,10 @@ function DitherForge() {
   const renderAlgorithm = selectedCustomAlgorithm?.base ?? (ALGORITHMS.includes(algo as Algorithm) ? (algo as Algorithm) : "Floyd–Steinberg");
   const algorithmOptions = useMemo(() => [...ALGORITHMS, ...customAlgorithms.map((a) => a.name)], [customAlgorithms]);
   const pulseDeckItem = SOCIAL_ALGORITHMS[pulseDeckIndex % SOCIAL_ALGORITHMS.length];
+  const pulseDeckNextItem = SOCIAL_ALGORITHMS[(pulseDeckIndex + 1) % SOCIAL_ALGORITHMS.length];
+  const pulseDeckDepthItem = SOCIAL_ALGORITHMS[(pulseDeckIndex + 2) % SOCIAL_ALGORITHMS.length];
+  const pulseDeckProgress = (pulseDeckIndex % SOCIAL_DECK_SIZE) + 1;
+  const pulseDeckProgressPct = (pulseDeckProgress / SOCIAL_DECK_SIZE) * 100;
 
   useEffect(() => {
     document.documentElement.classList.toggle("light", !dark);
@@ -249,6 +271,8 @@ function DitherForge() {
   const sourceCanvas = useRef<HTMLCanvasElement>(null);
   const previewCanvas = useRef<HTMLCanvasElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+  const videoInput = useRef<HTMLInputElement>(null);
+  const videoElement = useRef<HTMLVideoElement>(null);
 
   // initialize sample
   useEffect(() => { setSource(makeSampleImage(320, 200)); }, []);
@@ -290,6 +314,107 @@ function DitherForge() {
     img.src = url;
   }
 
+  function captureVideoFrame() {
+    const video = videoElement.current;
+    if (!video || video.videoWidth === 0 || video.videoHeight === 0) return;
+    const max = 480;
+    const scale = Math.min(1, max / Math.max(video.videoWidth, video.videoHeight));
+    const w = Math.max(1, Math.round(video.videoWidth * scale));
+    const h = Math.max(1, Math.round(video.videoHeight * scale));
+    const c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    const ctx = c.getContext("2d");
+    if (!ctx) return;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(video, 0, 0, w, h);
+
+    const pixelBlock = Math.max(1, Math.round(videoPixelSize));
+    if (pixelBlock > 1) {
+      const small = document.createElement("canvas");
+      small.width = Math.max(1, Math.round(w / pixelBlock));
+      small.height = Math.max(1, Math.round(h / pixelBlock));
+      const sctx = small.getContext("2d");
+      if (sctx) {
+        sctx.imageSmoothingEnabled = false;
+        sctx.drawImage(c, 0, 0, small.width, small.height);
+        ctx.clearRect(0, 0, w, h);
+        ctx.drawImage(small, 0, 0, small.width, small.height, 0, 0, w, h);
+      }
+    }
+
+    const frame = ctx.getImageData(0, 0, w, h);
+    const data = frame.data;
+    const brightness = videoBrightness / 100;
+    const contrast = videoContrast / 100;
+    const saturation = videoSaturation / 100;
+    const gamma = Math.max(0.1, videoGamma / 100);
+    const highlights = videoHighlights / 100;
+    const shadows = videoShadows / 100;
+    const temperature = videoTemperature / 100;
+    for (let i = 0; i < data.length; i += 4) {
+      let r = data[i] / 255;
+      let g = data[i + 1] / 255;
+      let b = data[i + 2] / 255;
+
+      // brightness + contrast in linearized normalized space
+      r = ((r - 0.5) * contrast + 0.5) * brightness;
+      g = ((g - 0.5) * contrast + 0.5) * brightness;
+      b = ((b - 0.5) * contrast + 0.5) * brightness;
+
+      // saturation
+      const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      r = luma + (r - luma) * saturation;
+      g = luma + (g - luma) * saturation;
+      b = luma + (b - luma) * saturation;
+
+      // highlights / shadows shaping
+      if (highlights !== 0 && luma > 0.5) {
+        const boost = (luma - 0.5) * 2 * highlights;
+        r += boost * (1 - r);
+        g += boost * (1 - g);
+        b += boost * (1 - b);
+      }
+      if (shadows !== 0 && luma < 0.5) {
+        const lift = (0.5 - luma) * 2 * shadows;
+        r += lift * (1 - r);
+        g += lift * (1 - g);
+        b += lift * (1 - b);
+      }
+
+      // temperature: warm up reds / cool down blues
+      r += temperature * 0.08;
+      b -= temperature * 0.08;
+
+      // gamma correction
+      r = Math.pow(Math.max(0, r), 1 / gamma);
+      g = Math.pow(Math.max(0, g), 1 / gamma);
+      b = Math.pow(Math.max(0, b), 1 / gamma);
+
+      data[i] = Math.max(0, Math.min(255, Math.round(r * 255)));
+      data[i + 1] = Math.max(0, Math.min(255, Math.round(g * 255)));
+      data[i + 2] = Math.max(0, Math.min(255, Math.round(b * 255)));
+    }
+    setSource(frame);
+  }
+
+  function loadVideo(file: File) {
+    if (videoUrl) URL.revokeObjectURL(videoUrl);
+    const nextUrl = URL.createObjectURL(file);
+    setVideoUrl(nextUrl);
+    setVideoName(file.name);
+    setVideoDuration(0);
+    setVideoCurrentTime(0);
+    setVideoPlaying(false);
+  }
+
+  function formatTime(seconds: number) {
+    const safe = Math.max(0, Math.floor(seconds));
+    const mm = Math.floor(safe / 60);
+    const ss = safe % 60;
+    return `${mm}:${String(ss).padStart(2, "0")}`;
+  }
+
   function exportImage() {
     if (!previewCanvas.current) return;
     previewCanvas.current.toBlob((b) => {
@@ -300,6 +425,140 @@ function DitherForge() {
       URL.revokeObjectURL(url);
     });
   }
+
+  async function exportVideoMp4(sizePreset: string = "original") {
+    const video = videoElement.current;
+    const canvas = previewCanvas.current;
+    if (!video || !canvas || !videoUrl || videoExporting) return;
+    if (typeof MediaRecorder === "undefined") return;
+
+    const presetScale: Record<string, number> = {
+      original: 1,
+      "0.5x": 0.5,
+      "2x": 2,
+      "3x": 3,
+      "4x": 4,
+    };
+    const scale = presetScale[sizePreset] ?? 1;
+    const exportCanvas = document.createElement("canvas");
+    exportCanvas.width = Math.max(1, Math.round(canvas.width * scale));
+    exportCanvas.height = Math.max(1, Math.round(canvas.height * scale));
+    const exportCtx = exportCanvas.getContext("2d");
+    if (!exportCtx) return;
+    exportCtx.imageSmoothingEnabled = false;
+    exportCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, exportCanvas.width, exportCanvas.height);
+
+    const stream = exportCanvas.captureStream(30);
+    const mp4MimeCandidates = [
+      "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+      "video/mp4;codecs=avc1",
+      "video/mp4",
+    ];
+    const mimeType = mp4MimeCandidates.find((m) => MediaRecorder.isTypeSupported(m));
+    if (!mimeType) {
+      window.alert("Export MP4 non supportato in questo browser/runtime. Servirebbe un encoder MP4 dedicato.");
+      return;
+    }
+
+    const chunks: BlobPart[] = [];
+    const recorder = new MediaRecorder(stream, { mimeType });
+
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+
+    try {
+      setVideoExporting(true);
+      setDialog(null);
+      setVideoPlaying(false);
+      video.pause();
+      video.currentTime = 0;
+      setVideoCurrentTime(0);
+      captureVideoFrame();
+
+      recorder.start(250);
+      const drawTimer = window.setInterval(() => {
+        exportCtx.clearRect(0, 0, exportCanvas.width, exportCanvas.height);
+        exportCtx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, exportCanvas.width, exportCanvas.height);
+      }, 33);
+
+      try {
+        await video.play();
+      } catch {
+        // If autoplay policy or runtime blocks playback, abort export cleanly.
+        if (recorder.state !== "inactive") recorder.stop();
+        window.clearInterval(drawTimer);
+        window.alert("Impossibile avviare la riproduzione durante l'export.");
+        return;
+      }
+      setVideoPlaying(true);
+
+      // Wait for end or fallback timeout (duration + 2s buffer).
+      await new Promise<void>((resolve) => {
+        const timeoutMs = Math.max(3000, Math.ceil((video.duration || 0) * 1000) + 2000);
+        const timeout = window.setTimeout(() => resolve(), timeoutMs);
+        const finish = () => {
+          window.clearTimeout(timeout);
+          resolve();
+        };
+        video.addEventListener("ended", finish, { once: true });
+      });
+
+      setVideoPlaying(false);
+      video.pause();
+      window.clearInterval(drawTimer);
+
+      await new Promise<void>((resolve) => {
+        recorder.onstop = () => resolve();
+        if (recorder.state !== "inactive") recorder.stop();
+        else resolve();
+      });
+
+      if (chunks.length === 0) {
+        window.alert("Export fallito: nessun frame registrato.");
+        return;
+      }
+
+      const blob = new Blob(chunks, { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const base = (videoName || "dither-video").replace(/\.[^/.]+$/, "").replace(/\W+/g, "_");
+      a.download = `${base}-dither.mp4`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setVideoExporting(false);
+    }
+  }
+
+  function swipePulseDeck(direction: "left" | "right", applyPreset: boolean) {
+    if (pulseSwipeActive) return;
+    setPulseSwipeDirection(direction);
+    setPulseSwipeActive(true);
+    window.setTimeout(() => {
+      if (applyPreset) setAlgo(pulseDeckItem.base);
+      setPulseDeckIndex((i) => i + 1);
+      setPulseSwipeActive(false);
+      setPulseSwipeDirection(null);
+    }, 220);
+  }
+
+  useEffect(() => {
+    if (!videoPlaying) return;
+    const timer = window.setInterval(() => {
+      const video = videoElement.current;
+      if (!video) return;
+      setVideoCurrentTime(video.currentTime);
+      captureVideoFrame();
+      if (video.ended) setVideoPlaying(false);
+    }, 80);
+    return () => window.clearInterval(timer);
+  }, [videoPlaying, videoBrightness, videoContrast, videoSaturation, videoGamma, videoHighlights, videoShadows, videoTemperature, videoPixelSize]);
+
+  useEffect(() => {
+    if (activeView === "Video" && videoUrl) captureVideoFrame();
+  }, [videoBrightness, videoContrast, videoSaturation, videoGamma, videoHighlights, videoShadows, videoTemperature, videoPixelSize, activeView, videoUrl]);
 
   const filteredPalettes = paletteOptions.filter((p) => {
     if (category !== "All" && p.category !== category) return false;
@@ -324,6 +583,7 @@ function DitherForge() {
         <nav className="flex-1 overflow-y-auto px-3 pb-6 text-sm">
           <SidebarSection label="Workspace">
             <NavItem icon={Pencil} label="Editor" active={activeView === "Editor"} onClick={() => setActiveView("Editor")} />
+            <NavItem icon={Clapperboard} label="Video Workspace" active={activeView === "Video"} onClick={() => setActiveView("Video")} />
             <NavItem icon={Layers} label="Batch Processor" active={activeView === "Batch Processor"} onClick={() => { setActiveView("Batch Processor"); openComingSoon("Batch Processor"); }} />
             <NavItem icon={ImageIcon} label="Gallery" active={activeView === "Gallery"} onClick={() => { setActiveView("Gallery"); openComingSoon("Gallery"); }} />
             <NavItem icon={Share2} label="Social" active={activeView === "Social"} onClick={() => setActiveView("Social")} />
@@ -369,10 +629,20 @@ function DitherForge() {
             <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => setSource(makeSampleImage())}>
               <FilePlus2 className="h-3.5 w-3.5" /> New Project
             </Button>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => fileInput.current?.click()}>
-              <FolderOpen className="h-3.5 w-3.5" /> Open
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs"
+              onClick={() => (activeView === "Video" ? videoInput.current?.click() : fileInput.current?.click())}
+            >
+              <FolderOpen className="h-3.5 w-3.5" /> {activeView === "Video" ? "Open Video" : "Open"}
             </Button>
-            <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={exportImage}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-1.5 text-xs"
+              onClick={() => (activeView === "Video" ? setDialog("videoExport") : exportImage())}
+            >
               <Save className="h-3.5 w-3.5" /> Save
             </Button>
             <ToolButton icon={dark ? Sun : Moon} onClick={() => setDark((v) => !v)} />
@@ -382,6 +652,13 @@ function DitherForge() {
               accept="image/*"
               className="hidden"
               onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])}
+            />
+            <input
+              ref={videoInput}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={(e) => e.target.files?.[0] && loadVideo(e.target.files[0])}
             />
           </div>
         </header>
@@ -827,8 +1104,261 @@ function DitherForge() {
               </Panel>
             </div>
           </div>
+        ) : activeView === "Video" ? (
+          <div className="grid flex-1 grid-cols-[1fr_320px] overflow-hidden">
+            <div className="flex flex-col overflow-y-auto p-5">
+              <div className="grid flex-1 grid-cols-2 gap-5 overflow-hidden">
+                <Panel title="VIDEO FRAME">
+                  <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-md bg-black/30 p-3">
+                    <canvas
+                      ref={sourceCanvas}
+                      className="max-h-full max-w-full"
+                      style={{ imageRendering: "pixelated", transform: `scale(${zoom / 100})` }}
+                    />
+                  </div>
+                  <div className="px-1 pt-2 text-xs text-muted-foreground">
+                    {videoName ? `${videoName} · ${formatTime(videoCurrentTime)} / ${formatTime(videoDuration)}` : "Carica un video per iniziare"}
+                  </div>
+                </Panel>
+                <Panel
+                  title="DITHER PREVIEW"
+                  right={
+                    <Select value={algo} onValueChange={setAlgo}>
+                      <SelectTrigger className="h-7 w-44 bg-panel text-xs"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {algorithmOptions.map((a) => <SelectItem key={a} value={a} className="text-xs">{a}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  }
+                >
+                  <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-md bg-black/30 p-3">
+                    <canvas
+                      ref={previewCanvas}
+                      className="block max-h-full max-w-full"
+                      style={{ imageRendering: "pixelated", transform: `scale(${zoom / 100})`, transformOrigin: "center" }}
+                    />
+                  </div>
+                </Panel>
+              </div>
+
+              <Panel className="mt-5" title="VIDEO TIMELINE">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        const video = videoElement.current;
+                        if (!video) return;
+                        if (videoPlaying) {
+                          video.pause();
+                          setVideoPlaying(false);
+                        } else {
+                          void video.play();
+                          setVideoPlaying(true);
+                        }
+                      }}
+                      className="grid h-8 w-8 place-items-center rounded-md border border-border bg-panel text-muted-foreground hover:text-foreground"
+                    >
+                      {videoPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    </button>
+                    <div className="w-24 text-xs text-muted-foreground">{formatTime(videoCurrentTime)}</div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={Math.max(videoDuration, 0.001)}
+                      step={0.01}
+                      value={Math.min(videoCurrentTime, videoDuration || 0)}
+                      onChange={(e) => {
+                        const next = Number(e.target.value);
+                        const video = videoElement.current;
+                        if (!video) return;
+                        video.currentTime = next;
+                        setVideoCurrentTime(next);
+                        captureVideoFrame();
+                      }}
+                      className="h-2 flex-1 cursor-pointer accent-[hsl(var(--cream))]"
+                    />
+                    <div className="w-24 text-right text-xs text-muted-foreground">{formatTime(videoDuration)}</div>
+                  </div>
+                  <div className="rounded-md border border-border/70 bg-panel/40 p-2 text-xs text-muted-foreground">
+                    Stesso workflow dell'Editor, ma con timeline video per scrub frame-by-frame e preview dithering in tempo reale.
+                  </div>
+                </div>
+              </Panel>
+
+              <Panel className="mt-5" title="PALETTE LIBRARY">
+                <div className="flex items-center gap-2 pb-3">
+                  <div className="flex flex-wrap gap-1.5">
+                    {CATEGORIES.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setCategory(c)}
+                        className={cn(
+                          "rounded-md px-3 py-1 text-xs transition-colors",
+                          category === c
+                            ? "bg-cream text-cream-foreground"
+                            : "bg-panel text-muted-foreground hover:text-foreground",
+                        )}
+                      >
+                        {c === "Retro Gaming" && "🎮 "}{c}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="ml-auto flex items-center gap-2 rounded-md border border-border bg-panel px-2">
+                    <Search className="h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Search palettes..."
+                      className="h-7 w-44 border-0 bg-transparent p-0 text-xs focus-visible:ring-0"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2 overflow-y-auto md:grid-cols-3 lg:grid-cols-5">
+                  {filteredPalettes.map((p) => (
+                    <button
+                      key={`video-${p.name}`}
+                      onClick={() => setPaletteName(p.name)}
+                      className={cn(
+                        "group rounded-md border p-2 text-left transition-colors",
+                        paletteName === p.name
+                          ? "border-cream/60 bg-cream/5"
+                          : "border-border bg-panel hover:border-cream/40",
+                      )}
+                    >
+                      <div className="text-xs font-medium">{p.name}</div>
+                      <div className="text-[10px] text-muted-foreground">{p.colors.length} colors</div>
+                      <div className="mt-2 flex h-4 overflow-hidden rounded">
+                        {p.colors.slice(0, 12).map((c, i) => (
+                          <div key={i} className="flex-1" style={{ backgroundColor: c }} />
+                        ))}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </Panel>
+
+              {videoUrl && (
+                <video
+                  ref={videoElement}
+                  src={videoUrl}
+                  className="hidden"
+                  onLoadedMetadata={(e) => {
+                    setVideoDuration(e.currentTarget.duration || 0);
+                    setVideoCurrentTime(0);
+                    captureVideoFrame();
+                  }}
+                  onTimeUpdate={(e) => {
+                    setVideoCurrentTime(e.currentTarget.currentTime);
+                  }}
+                  onSeeked={captureVideoFrame}
+                  onEnded={() => setVideoPlaying(false)}
+                />
+              )}
+            </div>
+
+            <aside className="flex flex-col gap-4 overflow-y-auto border-l border-border p-5">
+              <Field label="Algorithm">
+                <Select value={algo} onValueChange={setAlgo}>
+                  <SelectTrigger className="h-9 bg-panel"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {algorithmOptions.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Palette">
+                <Select value={paletteName} onValueChange={setPaletteName}>
+                  <SelectTrigger className="h-9 bg-panel"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {paletteOptions.map((p) => <SelectItem key={p.name} value={p.name}>{p.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Bit Depth">
+                <div className="grid grid-cols-5 gap-1 rounded-md border border-border bg-panel p-1">
+                  {([1, 2, 4, 8, 16] as const).map((b) => (
+                    <button
+                      key={`video-bit-${b}`}
+                      disabled={paletteFixedBitDepth !== null && b !== paletteFixedBitDepth}
+                      onClick={() => setBitDepth(b)}
+                      className={cn(
+                        "rounded px-2 py-1 text-xs transition-colors",
+                        bitDepth === b && "bg-cream text-cream-foreground",
+                        bitDepth !== b && "text-muted-foreground hover:text-foreground",
+                        paletteFixedBitDepth !== null && b !== paletteFixedBitDepth && "cursor-not-allowed opacity-30 hover:text-muted-foreground",
+                      )}
+                    >
+                      {b} Bit
+                    </button>
+                  ))}
+                </div>
+              </Field>
+              <div className="rounded-md border border-border bg-panel/50 p-3">
+                <div className="mb-3 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Video Tone</div>
+                <Field label="Brightness" value={`${videoBrightness}%`}>
+                  <Slider value={[videoBrightness]} onValueChange={(v) => setVideoBrightness(v[0])} min={50} max={150} step={1} />
+                </Field>
+                <Field label="Contrast" value={`${videoContrast}%`}>
+                  <Slider value={[videoContrast]} onValueChange={(v) => setVideoContrast(v[0])} min={50} max={170} step={1} />
+                </Field>
+                <Field label="Saturation" value={`${videoSaturation}%`}>
+                  <Slider value={[videoSaturation]} onValueChange={(v) => setVideoSaturation(v[0])} min={0} max={180} step={1} />
+                </Field>
+                <Field label="Gamma" value={`${videoGamma}%`}>
+                  <Slider value={[videoGamma]} onValueChange={(v) => setVideoGamma(v[0])} min={60} max={180} step={1} />
+                </Field>
+                <Field label="Highlights" value={`${videoHighlights > 0 ? "+" : ""}${videoHighlights}%`}>
+                  <Slider value={[videoHighlights]} onValueChange={(v) => setVideoHighlights(v[0])} min={-40} max={40} step={1} />
+                </Field>
+                <Field label="Shadows" value={`${videoShadows > 0 ? "+" : ""}${videoShadows}%`}>
+                  <Slider value={[videoShadows]} onValueChange={(v) => setVideoShadows(v[0])} min={-40} max={40} step={1} />
+                </Field>
+                <Field label="Temperature" value={`${videoTemperature > 0 ? "+" : ""}${videoTemperature}%`}>
+                  <Slider value={[videoTemperature]} onValueChange={(v) => setVideoTemperature(v[0])} min={-50} max={50} step={1} />
+                </Field>
+                <Field label="Pixel Size" value={`${videoPixelSize}x`}>
+                  <Slider value={[videoPixelSize]} onValueChange={(v) => setVideoPixelSize(v[0])} min={1} max={8} step={1} />
+                </Field>
+              </div>
+              <Field label="Intensity" value={`${intensity}%`}>
+                <Slider value={[intensity]} onValueChange={(v) => setIntensity(v[0])} max={100} step={1} />
+              </Field>
+              <Field label="Noise" value={`${noise}%`}>
+                <Slider value={[noise]} onValueChange={(v) => setNoise(v[0])} max={100} step={1} />
+              </Field>
+              <Field label="Sharpen" value={`${sharpen}%`}>
+                <Slider value={[sharpen]} onValueChange={(v) => setSharpen(v[0])} max={100} step={1} />
+              </Field>
+              <div className="rounded-md border border-border bg-panel/50 p-3 text-xs">
+                <Info2 label="Clip" value={videoName || "No video"} />
+                <Info2 label="Time" value={`${formatTime(videoCurrentTime)} / ${formatTime(videoDuration)}`} />
+                <Info2 label="Algorithm" value={algo} />
+                <Info2 label="Palette" value={palette.name} />
+                <Info2 label="Brightness" value={`${videoBrightness}%`} />
+                <Info2 label="Contrast" value={`${videoContrast}%`} />
+                <Info2 label="Pixel Size" value={`${videoPixelSize}x`} />
+              </div>
+              <button
+                onClick={() => setDialog("videoExport")}
+                disabled={!videoUrl || videoExporting}
+                className={cn(
+                  "flex items-center justify-center gap-2 rounded-md py-2.5 text-sm font-semibold transition-opacity",
+                  !videoUrl || videoExporting
+                    ? "cursor-not-allowed bg-panel text-muted-foreground opacity-70"
+                    : "bg-cream text-cream-foreground hover:opacity-90",
+                )}
+              >
+                <Download className="h-4 w-4" />
+                {videoExporting ? "Exporting Video..." : "EXPORT VIDEO (.MP4)"}
+              </button>
+            </aside>
+          </div>
         ) : activeView === "Social" ? (
-          <div className="flex-1 overflow-y-auto p-5">
+          <div className="relative flex-1 overflow-y-auto p-5">
+            <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+              <div className="absolute -left-24 top-12 h-56 w-56 rounded-full bg-cream/10 blur-3xl" />
+              <div className="absolute right-8 top-36 h-48 w-48 rounded-full bg-cyan-400/10 blur-3xl" />
+              <div className="absolute bottom-10 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-fuchsia-500/10 blur-3xl" />
+            </div>
             <div className="mb-5 flex items-start justify-between gap-4">
               <div>
                 <div className="text-[11px] font-medium uppercase tracking-wider text-cream">Workspace / Social</div>
@@ -852,34 +1382,93 @@ function DitherForge() {
               ))}
             </div>
 
+            <div className="mb-5 flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-white/20 bg-white/5 px-3 py-1 text-[11px] text-cream backdrop-blur">PulseDeck Mode</span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-muted-foreground backdrop-blur">#{pulseDeckItem.tags[0]}</span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-muted-foreground backdrop-blur">{pulseDeckItem.base}</span>
+            </div>
+
             {socialTab === "PulseDeck" && (
-              <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
-                <Panel title="PULSEDECK">
-                  <div className="mx-auto max-w-md">
-                    <div className="relative rounded-[1.75rem] border border-cream/30 bg-panel p-3 shadow-2xl shadow-black/30">
-                      <div className="overflow-hidden rounded-[1.25rem] border border-border bg-background">
+              <div className="space-y-5">
+                <div className="grid gap-5 xl:grid-cols-[1fr_320px]">
+                  <Panel title="PULSEDECK">
+                    <div className="mx-auto max-w-lg">
+                    <div className="mb-3 rounded-lg border border-white/10 bg-white/5 p-3 backdrop-blur">
+                      <div className="mb-2 flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground">Deck progress</span>
+                        <span className="font-medium text-foreground">{pulseDeckProgress}/{SOCIAL_DECK_SIZE}</span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                        <div className="h-full rounded-full bg-gradient-to-r from-cream via-orange-300 to-pink-400 transition-all duration-300" style={{ width: `${pulseDeckProgressPct}%` }} />
+                      </div>
+                    </div>
+                    <div className="relative rounded-[1.75rem] border border-white/15 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-3 shadow-2xl shadow-black/40 backdrop-blur-md">
+                      <div className="pointer-events-none absolute -inset-5 rounded-[2rem] border border-cream/10 opacity-70" />
+                      <div className="pointer-events-none absolute inset-x-8 top-8 h-12 rounded-full bg-cream/20 blur-2xl" />
+                      <div className="pointer-events-none absolute left-1/2 top-3 z-20 -translate-x-1/2 rounded-full border border-white/20 bg-black/30 px-3 py-1 text-[10px] uppercase tracking-wider text-white/80 backdrop-blur">
+                        Swipe Deck
+                      </div>
+                      <div className="relative h-[36.5rem] [perspective:1100px]">
+                        <div className="pointer-events-none absolute inset-x-6 top-12 rounded-[1.25rem] border border-white/10 bg-white/5 p-2 opacity-35 blur-md">
+                          <div
+                            className="h-[21rem] rounded-[0.9rem] scale-[0.96]"
+                            style={{
+                              backgroundImage: `radial-gradient(circle at 25% 20%, ${pulseDeckDepthItem.color}, transparent 30%), repeating-linear-gradient(45deg, ${pulseDeckDepthItem.color} 0 2px, transparent 2px 9px), linear-gradient(135deg, #050505, #202020)`,
+                            }}
+                          />
+                        </div>
+                        <div className="pointer-events-none absolute inset-x-3 top-6 rounded-[1.25rem] border border-white/15 bg-white/5 p-2 opacity-60 blur-[1.5px]">
+                          <div
+                            className="h-[21rem] rounded-[0.9rem] scale-[0.985]"
+                            style={{
+                              backgroundImage: `radial-gradient(circle at 25% 20%, ${pulseDeckNextItem.color}, transparent 30%), repeating-linear-gradient(45deg, ${pulseDeckNextItem.color} 0 2px, transparent 2px 9px), linear-gradient(135deg, #050505, #202020)`,
+                            }}
+                          />
+                        </div>
                         <div
-                          className="h-72"
-                          style={{
-                            backgroundImage: `radial-gradient(circle at 25% 20%, ${pulseDeckItem.color}, transparent 30%), repeating-linear-gradient(45deg, ${pulseDeckItem.color} 0 2px, transparent 2px 9px), linear-gradient(135deg, #050505, #202020)`,
-                          }}
+                          className={cn(
+                            "absolute inset-x-0 top-0 overflow-hidden rounded-[1.25rem] border border-white/10 bg-background/80 backdrop-blur transition-all duration-200",
+                            pulseSwipeActive && pulseSwipeDirection === "left" && "-translate-x-14 rotate-[-7deg] opacity-20",
+                            pulseSwipeActive && pulseSwipeDirection === "right" && "translate-x-14 rotate-[7deg] opacity-20",
+                          )}
+                          style={{ transformStyle: "preserve-3d" }}
                         >
-                          <div className="flex h-full flex-col justify-between bg-gradient-to-t from-black/90 via-transparent to-black/30 p-5">
-                            <div className="flex justify-between text-xs">
-                              <span className="rounded-full bg-black/50 px-3 py-1 text-cream">Community preset</span>
-                              <span className="rounded-full bg-black/50 px-3 py-1 text-white">{pulseDeckItem.likes} ♥</span>
-                            </div>
-                            <div>
-                              <div className="text-2xl font-bold text-white">{pulseDeckItem.name}</div>
-                              <div className="mt-1 text-sm text-white/70">by @{pulseDeckItem.author} · {pulseDeckItem.base}</div>
+                          <div
+                            className="relative h-[21rem]"
+                            style={{
+                              backgroundImage: `radial-gradient(circle at 25% 20%, ${pulseDeckItem.color}, transparent 30%), repeating-linear-gradient(45deg, ${pulseDeckItem.color} 0 2px, transparent 2px 9px), linear-gradient(135deg, #050505, #202020)`,
+                            }}
+                          >
+                            <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full border border-white/20 bg-white/10 blur-xl" />
+                            <div className="pointer-events-none absolute -bottom-10 left-5 h-24 w-24 rounded-full bg-black/30 blur-2xl" />
+                            <div className="flex h-full flex-col justify-between bg-gradient-to-t from-black/90 via-transparent to-black/30 p-5">
+                              <div className="flex justify-between text-xs">
+                                <span className="rounded-full border border-white/20 bg-black/35 px-3 py-1 text-cream backdrop-blur">Community preset</span>
+                                <span className="rounded-full border border-white/20 bg-black/35 px-3 py-1 text-white backdrop-blur">{pulseDeckItem.likes} ♥</span>
+                              </div>
+                              <div>
+                                <div className="text-2xl font-bold text-white">{pulseDeckItem.name}</div>
+                                <div className="mt-1 text-sm text-white/70">by @{pulseDeckItem.author} · {pulseDeckItem.base}</div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        <div className="space-y-3 p-4">
-                          <div>
-                            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Tags</div>
-                            <div className="mt-2 flex flex-wrap gap-1">
-                              {pulseDeckItem.tags.map((tag) => <span key={tag} className="rounded bg-background px-2 py-1 text-[10px] text-muted-foreground">#{tag}</span>)}
+                          <div className="space-y-3 p-4">
+                            <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
+                              <div className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-muted-foreground">
+                                Likes
+                                <div className="mt-0.5 text-xs font-semibold text-foreground">{pulseDeckItem.likes}</div>
+                              </div>
+                              <div className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-muted-foreground">
+                                Base
+                                <div className="mt-0.5 truncate text-xs font-semibold text-foreground">{pulseDeckItem.base}</div>
+                              </div>
+                              <div className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-muted-foreground">
+                                Tags
+                                <div className="mt-0.5 text-xs font-semibold text-foreground">{pulseDeckItem.tags.length}</div>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap justify-center gap-1">
+                              {pulseDeckItem.tags.map((tag) => <span key={tag} className="rounded-full border border-white/10 bg-background/70 px-2 py-1 text-[10px] text-muted-foreground backdrop-blur">#{tag}</span>)}
                             </div>
                           </div>
                         </div>
@@ -887,17 +1476,14 @@ function DitherForge() {
                     </div>
                     <div className="mt-5 flex items-center justify-center gap-8">
                       <button
-                        className="grid h-14 w-14 place-items-center rounded-full border border-border bg-panel text-muted-foreground shadow-lg transition hover:border-red-400 hover:text-red-400"
-                        onClick={() => setPulseDeckIndex((i) => i + 1)}
+                        className="grid h-14 w-14 place-items-center rounded-full border border-border bg-panel text-muted-foreground shadow-lg transition hover:-translate-y-0.5 hover:border-red-400 hover:text-red-400"
+                        onClick={() => swipePulseDeck("left", false)}
                       >
                         <X className="h-6 w-6" />
                       </button>
                       <button
-                        className="grid h-16 w-16 place-items-center rounded-full bg-cream text-cream-foreground shadow-lg transition hover:scale-105"
-                        onClick={() => {
-                          setAlgo(pulseDeckItem.base);
-                          setPulseDeckIndex((i) => i + 1);
-                        }}
+                        className="grid h-16 w-16 place-items-center rounded-full bg-cream text-cream-foreground shadow-lg shadow-cream/30 transition hover:scale-105 hover:shadow-xl hover:shadow-cream/40"
+                        onClick={() => swipePulseDeck("right", true)}
                       >
                         <Heart className="h-7 w-7 fill-current" />
                       </button>
@@ -905,16 +1491,99 @@ function DitherForge() {
                     <div className="mt-3 text-center text-xs text-muted-foreground">
                       Premi X per scartare o cuore per usare il preset base e passare alla prossima carta.
                     </div>
-                  </div>
-                </Panel>
-                <aside className="space-y-5">
-                  <Panel title="HOW IT WORKS">
-                    <div className="space-y-2 text-xs text-muted-foreground">
-                      <div>PulseDeck mostra una carta alla volta: X scarta, cuore applica il preset base e passa al prossimo algoritmo community.</div>
-                      <div className="rounded border border-border bg-panel/50 p-2">Prossimo step: gesture drag reali, profili utente e import completo della blueprint community.</div>
                     </div>
                   </Panel>
-                </aside>
+                  <aside className="space-y-5">
+                    <Panel title="NEXT IN STACK">
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-2 backdrop-blur">
+                        <div
+                          className="h-36 rounded-lg"
+                          style={{
+                            backgroundImage: `radial-gradient(circle at 25% 20%, ${pulseDeckNextItem.color}, transparent 30%), repeating-linear-gradient(45deg, ${pulseDeckNextItem.color} 0 2px, transparent 2px 9px), linear-gradient(135deg, #050505, #202020)`,
+                          }}
+                        />
+                        <div className="p-2">
+                          <div className="truncate text-sm font-medium">{pulseDeckNextItem.name}</div>
+                          <div className="text-[11px] text-muted-foreground">@{pulseDeckNextItem.author}</div>
+                        </div>
+                      </div>
+                    </Panel>
+                    <Panel title="QUICK ACTIONS">
+                      <div className="space-y-2 text-xs">
+                        <button className="w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-left text-muted-foreground transition hover:border-cream/40 hover:text-foreground">
+                          Segui creator simili a @{pulseDeckItem.author}
+                        </button>
+                        <button className="w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-left text-muted-foreground transition hover:border-cream/40 hover:text-foreground">
+                          Apri collezione #{pulseDeckItem.tags[0]}
+                        </button>
+                        <button className="w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-left text-muted-foreground transition hover:border-cream/40 hover:text-foreground">
+                          Genera variante da {pulseDeckItem.base}
+                        </button>
+                      </div>
+                    </Panel>
+                    <Panel title="DECK SIGNAL">
+                      <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
+                        <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                          <div className="text-muted-foreground">Current</div>
+                          <div className="mt-1 h-2 rounded-full" style={{ backgroundColor: pulseDeckItem.color }} />
+                        </div>
+                        <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                          <div className="text-muted-foreground">Next</div>
+                          <div className="mt-1 h-2 rounded-full" style={{ backgroundColor: pulseDeckNextItem.color }} />
+                        </div>
+                        <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                          <div className="text-muted-foreground">Depth</div>
+                          <div className="mt-1 h-2 rounded-full" style={{ backgroundColor: pulseDeckDepthItem.color }} />
+                        </div>
+                      </div>
+                    </Panel>
+                  </aside>
+                </div>
+
+                <div className="grid gap-5 lg:grid-cols-2">
+                  <Panel title="TRENDING STYLES">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {SOCIAL_ALGORITHMS.map((item) => (
+                        <button
+                          key={`trend-${item.name}`}
+                          onClick={() => setAlgo(item.base)}
+                          className="overflow-hidden rounded-lg border border-white/10 bg-white/5 text-left transition hover:-translate-y-0.5 hover:border-cream/40"
+                        >
+                          <div
+                            className="h-20"
+                            style={{
+                              backgroundImage: `radial-gradient(circle at 30% 30%, ${item.color}, transparent 45%), linear-gradient(135deg, #050505, #252525)`,
+                            }}
+                          />
+                          <div className="p-3">
+                            <div className="truncate text-sm font-medium">{item.name}</div>
+                            <div className="text-[11px] text-muted-foreground">{item.base}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </Panel>
+                  <Panel title="TAG CLOUD">
+                    <div className="flex flex-wrap gap-2">
+                      {Array.from(new Set(SOCIAL_ALGORITHMS.flatMap((item) => item.tags))).map((tag) => (
+                        <button
+                          key={`tag-${tag}`}
+                          className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-muted-foreground backdrop-blur transition hover:border-cream/40 hover:text-foreground"
+                        >
+                          #{tag}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-4 grid grid-cols-4 gap-2">
+                      {SOCIAL_ALGORITHMS.slice(0, 4).map((item) => (
+                        <div key={`chip-${item.name}`} className="rounded-md border border-white/10 bg-white/5 p-2">
+                          <div className="h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                          <div className="mt-1 truncate text-[10px] text-muted-foreground">{item.author}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </Panel>
+                </div>
               </div>
             )}
 
@@ -936,12 +1605,15 @@ function DitherForge() {
                 <Panel title="MATCHING COMMUNITY LOOKS">
                   <div className="grid gap-3 md:grid-cols-2">
                     {SOCIAL_ALGORITHMS.map((item) => (
-                      <button key={item.name} className="rounded-md border border-border bg-panel/50 p-3 text-left hover:border-cream/40" onClick={() => setAlgo(item.base)}>
+                      <button key={item.name} className="rounded-md border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-3 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-cream/40 hover:shadow-lg hover:shadow-black/20" onClick={() => setAlgo(item.base)}>
                         <div className="mb-2 h-8 rounded" style={{ background: `linear-gradient(90deg, ${socialColorSearch}, ${item.color})` }} />
                         <div className="font-medium">{item.name}</div>
                         <div className="text-xs text-muted-foreground">{item.base} · matched against {socialColorSearch}</div>
                       </button>
                     ))}
+                  </div>
+                  <div className="mt-3 rounded border border-white/10 bg-white/5 p-3 text-xs text-muted-foreground">
+                    Suggerimento: scegli un colore saturo per trovare preset con contrasto forte, o un colore medio-desaturato per look più cinematici.
                   </div>
                 </Panel>
               </div>
@@ -962,14 +1634,17 @@ function DitherForge() {
                 <Panel title="COMMUNITY RESULTS">
                   <div className="grid gap-3 md:grid-cols-2">
                     {SOCIAL_ALGORITHMS.filter((item) => item.base === socialAlgorithmSearch || socialAlgorithmSearch === "Floyd–Steinberg").map((item) => (
-                      <button key={item.name} className="rounded-md border border-border bg-panel/50 p-3 text-left hover:border-cream/40" onClick={() => setAlgo(item.base)}>
+                      <button key={item.name} className="rounded-md border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-3 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-cream/40 hover:shadow-lg hover:shadow-black/20" onClick={() => setAlgo(item.base)}>
                         <div className="font-medium">{item.name}</div>
                         <div className="text-xs text-muted-foreground">Base: {item.base} · @{item.author}</div>
                         <div className="mt-2 flex flex-wrap gap-1">
-                          {item.tags.map((tag) => <span key={tag} className="rounded bg-background px-2 py-1 text-[10px] text-muted-foreground">#{tag}</span>)}
+                          {item.tags.map((tag) => <span key={tag} className="rounded border border-white/10 bg-background/70 px-2 py-1 text-[10px] text-muted-foreground backdrop-blur">#{tag}</span>)}
                         </div>
                       </button>
                     ))}
+                  </div>
+                  <div className="mt-3 rounded border border-white/10 bg-white/5 p-3 text-xs text-muted-foreground">
+                    Tip: combina `Algorithm Search` con la palette attiva per costruire una pipeline coerente tra feed social e output finale.
                   </div>
                 </Panel>
               </div>
@@ -1346,6 +2021,40 @@ function DitherForge() {
               className="flex w-full items-center justify-center gap-2 rounded-md bg-cream py-2.5 text-sm font-semibold text-cream-foreground hover:opacity-90"
             >
               <Download className="h-4 w-4" /> Download PNG
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "videoExport"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Video MP4</DialogTitle>
+            <DialogDescription>Scegli la dimensione di export (include originale).</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-sm">
+            <Field label="Export Size">
+              <Select value={videoExportSize} onValueChange={setVideoExportSize}>
+                <SelectTrigger className="h-9 bg-panel"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="original">Originale</SelectItem>
+                  <SelectItem value="0.5x">0.5x</SelectItem>
+                  <SelectItem value="2x">2x</SelectItem>
+                  <SelectItem value="3x">3x</SelectItem>
+                  <SelectItem value="4x">4x</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <div className="rounded-md border border-border bg-panel/50 p-3 text-xs">
+              <Info2 label="Clip" value={videoName || "No video"} />
+              <Info2 label="Size" value={videoExportSize === "original" ? "Originale" : videoExportSize} />
+            </div>
+            <button
+              onClick={() => void exportVideoMp4(videoExportSize)}
+              disabled={!videoUrl || videoExporting}
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-cream py-2.5 text-sm font-semibold text-cream-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Download className="h-4 w-4" /> {videoExporting ? "Exporting..." : "Start Export MP4"}
             </button>
           </div>
         </DialogContent>
