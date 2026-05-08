@@ -6,6 +6,7 @@ import {
   GitCompare, Monitor, Download, Settings, Keyboard, Info, Play, Grid3x3,
   Star, ChevronDown, Box, Sun, Sparkles, Share2,
   X, Heart, Clapperboard, Pause,
+  ZoomIn, ZoomOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -80,6 +81,8 @@ function DitherForge() {
   const [showCrtControls, setShowCrtControls] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
   const [pixelGrid, setPixelGrid] = useState(false);
+  const [pixelSize, setPixelSize] = useState(1);
+  const [lastPinchDist, setLastPinchDist] = useState<number | null>(null);
   const [activeView, setActiveView] = useState<string>("Editor");
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [videoName, setVideoName] = useState("");
@@ -292,9 +295,28 @@ function DitherForge() {
       intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen,
     });
     const c = previewCanvas.current;
-    c.width = out.width; c.height = out.height;
-    c.getContext("2d")!.putImageData(out, 0, 0);
-  }, [source, palette, renderAlgorithm, intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen]);
+    const block = Math.max(1, Math.round(pixelSize));
+    if (block > 1) {
+      const small = document.createElement("canvas");
+      small.width = Math.max(1, Math.round(out.width / block));
+      small.height = Math.max(1, Math.round(out.height / block));
+      const sctx = small.getContext("2d");
+      if (sctx) {
+        sctx.imageSmoothingEnabled = false;
+        const temp = document.createElement("canvas");
+        temp.width = out.width; temp.height = out.height;
+        temp.getContext("2d")!.putImageData(out, 0, 0);
+        sctx.drawImage(temp, 0, 0, small.width, small.height);
+        c.width = out.width; c.height = out.height;
+        const ctx = c.getContext("2d")!;
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(small, 0, 0, small.width, small.height, 0, 0, out.width, out.height);
+      }
+    } else {
+      c.width = out.width; c.height = out.height;
+      c.getContext("2d")!.putImageData(out, 0, 0);
+    }
+  }, [source, palette, renderAlgorithm, intensity, bitDepth, serpentine, errorDiffusion, noise, sharpen, pixelSize]);
 
   function loadFile(file: File) {
     const url = URL.createObjectURL(file);
@@ -1674,7 +1696,27 @@ function DitherForge() {
                 }
               >
                 <div className="relative flex flex-1 items-center justify-center overflow-hidden rounded-md bg-black/30 p-3">
-                  <div className="relative">
+                  <div
+                    className="relative touch-none"
+                    onTouchStart={(e) => {
+                      if (e.touches.length === 2) {
+                        const dx = e.touches[0].clientX - e.touches[1].clientX;
+                        const dy = e.touches[0].clientY - e.touches[1].clientY;
+                        setLastPinchDist(Math.sqrt(dx * dx + dy * dy));
+                      }
+                    }}
+                    onTouchMove={(e) => {
+                      if (e.touches.length === 2 && lastPinchDist !== null) {
+                        const dx = e.touches[0].clientX - e.touches[1].clientX;
+                        const dy = e.touches[0].clientY - e.touches[1].clientY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        const ratio = dist / lastPinchDist;
+                        setZoom((z) => Math.max(25, Math.min(400, Math.round(z * ratio))));
+                        setLastPinchDist(dist);
+                      }
+                    }}
+                    onTouchEnd={() => setLastPinchDist(null)}
+                  >
                     <canvas
                       ref={previewCanvas}
                       className="block max-h-full max-w-full"
@@ -1728,7 +1770,9 @@ function DitherForge() {
                   <div className="flex items-center gap-1">
                     <ToolButton icon={Play} onClick={() => setSource(makeSampleImage())} />
                     <ToolButton icon={Grid3x3} active={pixelGrid} onClick={() => setPixelGrid((v) => !v)} />
+                    <button onClick={() => setZoom((z) => Math.max(25, z - 25))} className="rounded border border-border px-2 py-1 text-xs hover:bg-accent"><ZoomOut className="h-3 w-3" /></button>
                     <button onClick={() => setZoom(100)} className="rounded border border-border px-2 py-1 text-xs hover:bg-accent">1:1</button>
+                    <button onClick={() => setZoom((z) => Math.min(400, z + 25))} className="rounded border border-border px-2 py-1 text-xs hover:bg-accent"><ZoomIn className="h-3 w-3" /></button>
                     <button onClick={() => setCompareMode((v) => !v)} className={cn("rounded border px-2 py-1 text-xs hover:bg-accent", compareMode ? "border-cream text-foreground" : "border-border")}>
                       Compare
                     </button>
@@ -1896,6 +1940,9 @@ function DitherForge() {
               </Row>
               <Row label="Sharpen" trailing={`${sharpen}%`}>
                 <Slider value={[sharpen]} onValueChange={(v) => setSharpen(v[0])} max={100} step={1} className="w-32" />
+              </Row>
+              <Row label="Pixel Size" trailing={`${pixelSize}x`}>
+                <Slider value={[pixelSize]} onValueChange={(v) => setPixelSize(v[0])} min={1} max={8} step={1} className="w-32" />
               </Row>
             </div>
 
