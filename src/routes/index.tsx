@@ -446,9 +446,15 @@ function NavItem({ icon: Icon, label, active, onClick }: { icon: React.Component
   );
 }
 
-function ToolButton({ icon: Icon }: { icon: React.ComponentType<{ className?: string }> }) {
+function ToolButton({ icon: Icon, onClick, active }: { icon: React.ComponentType<{ className?: string }>; onClick?: () => void; active?: boolean }) {
   return (
-    <button className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-panel hover:text-foreground">
+    <button
+      onClick={onClick}
+      className={cn(
+        "grid h-8 w-8 place-items-center rounded-md hover:bg-panel hover:text-foreground",
+        active ? "bg-panel text-foreground" : "text-muted-foreground",
+      )}
+    >
       <Icon className="h-4 w-4" />
     </button>
   );
