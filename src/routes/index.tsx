@@ -179,7 +179,7 @@ function DitherForge() {
                 {[25, 50, 75, 100, 150, 200, 400].map((z) => <option key={z} value={z}>{z}%</option>)}
               </select>
             </div>
-            <Button variant="ghost" size="sm" className="text-xs">Fit</Button>
+            <Button variant="ghost" size="sm" className="text-xs" onClick={() => setZoom(100)}>Fit</Button>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={() => setSource(makeSampleImage())}>
@@ -191,7 +191,7 @@ function DitherForge() {
             <Button variant="ghost" size="sm" className="gap-1.5 text-xs" onClick={exportImage}>
               <Save className="h-3.5 w-3.5" /> Save
             </Button>
-            <ToolButton icon={Moon} />
+            <ToolButton icon={dark ? Sun : Moon} onClick={() => setDark((v) => !v)} />
             <input
               ref={fileInput}
               type="file"
