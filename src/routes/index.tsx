@@ -459,6 +459,117 @@ function DitherForge() {
           </aside>
         </div>
       </main>
+
+      <Dialog open={dialog === "preferences"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Preferences</DialogTitle>
+            <DialogDescription>Configure your Dither Forge workspace.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">Dark theme</div>
+                <div className="text-xs text-muted-foreground">Use the dark retro UI.</div>
+              </div>
+              <Switch checked={dark} onCheckedChange={setDark} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">Serpentine scan (default)</div>
+                <div className="text-xs text-muted-foreground">Alternate scan direction per row.</div>
+              </div>
+              <Switch checked={serpentine} onCheckedChange={setSerpentine} />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">Error diffusion</div>
+                <div className="text-xs text-muted-foreground">Spread quantization error to neighbors.</div>
+              </div>
+              <Switch checked={errorDiffusion} onCheckedChange={setErrorDiffusion} />
+            </div>
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-sm font-medium">Default intensity</span>
+                <span className="text-xs text-muted-foreground">{intensity}%</span>
+              </div>
+              <Slider value={[intensity]} onValueChange={(v) => setIntensity(v[0])} max={100} step={1} />
+            </div>
+            <div className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
+              <Sparkles className="mr-1 inline h-3 w-3" /> Cloud sync, custom hotkeys & color profiles — coming soon.
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "shortcuts"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Keyboard Shortcuts</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-1 py-2 text-sm">
+            {[
+              ["Open file", "⌘ O"], ["Save / Export", "⌘ S"], ["New project", "⌘ N"],
+              ["Toggle CRT preview", "C"], ["Toggle pixel grid", "G"], ["Toggle compare", "K"],
+              ["Reset zoom (1:1)", "0"], ["Random palette", "R"],
+            ].map(([k, v]) => (
+              <div key={k} className="flex items-center justify-between border-b border-border/50 py-1.5">
+                <span className="text-muted-foreground">{k}</span>
+                <kbd className="rounded border border-border bg-panel px-2 py-0.5 font-mono text-xs">{v}</kbd>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "about"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>About Dither Forge</DialogTitle>
+            <DialogDescription>Retro pixel dithering studio inspired by classic consoles & home computers.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2 text-sm text-muted-foreground">
+            <p>Version 0.1 · Built with TanStack Start.</p>
+            <p>{PALETTES.length} palettes · {ALGORITHMS.length} algorithms.</p>
+            <p>Convert any image into authentic Game Boy, NES, C64, PICO-8, CRT and broadcast looks.</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "export"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Image</DialogTitle>
+            <DialogDescription>Save the dithered preview as a PNG file.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2 text-sm">
+            <div className="rounded-md border border-border bg-panel/50 p-3 text-xs">
+              <Info2 label="Resolution" value={source ? `${source.width} × ${source.height}` : "—"} />
+              <Info2 label="Palette" value={palette.name} />
+              <Info2 label="Algorithm" value={algo} />
+              <Info2 label="Bit Depth" value={`${bitDepth} Bit`} />
+            </div>
+            <button
+              onClick={() => { exportImage(); setDialog(null); }}
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-cream py-2.5 text-sm font-semibold text-cream-foreground hover:opacity-90"
+            >
+              <Download className="h-4 w-4" /> Download PNG
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={dialog === "comingsoon"} onOpenChange={(o) => !o && setDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Sparkles className="h-4 w-4" /> {comingSoonLabel}</DialogTitle>
+            <DialogDescription>Coming soon.</DialogDescription>
+          </DialogHeader>
+          <p className="py-2 text-sm text-muted-foreground">
+            This feature is on the roadmap. In the meantime keep using the Editor — palettes, algorithms, CRT preview and compare mode are all live.
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
