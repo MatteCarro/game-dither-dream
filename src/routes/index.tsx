@@ -4,7 +4,7 @@ import {
   Home, Redo2, Undo2, Search, FilePlus2, FolderOpen, Save, Moon,
   Pencil, Layers, Image as ImageIcon, Sliders, Palette as PaletteIcon,
   GitCompare, Monitor, Download, Settings, Keyboard, Info, Play, Grid3x3,
-  Maximize2, Shuffle, Star, ChevronDown, Box,
+  Shuffle, Star, ChevronDown, Box, Sun, Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { ALGORITHMS, PALETTES, dither, makeSampleImage, type Algorithm } from "@/lib/dither";
 import { cn } from "@/lib/utils";
 
