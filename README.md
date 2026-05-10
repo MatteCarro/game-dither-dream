@@ -2,17 +2,21 @@
 
 <br />
 
-<!-- LOGO / BANNER AREA -->
-<img src="gif.gif" alt="Dither Forge" width="100%" />
+```
+    ██████╗ ██╗████████╗██╗  ██╗███████╗██████╗     ███████╗ ██████╗ ██████╗  ██████╗ ███████╗
+    ██╔══██╗██║╚══██╔══╝██║  ██║██╔════╝██╔══██╗    ██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝
+    ██║  ██║██║   ██║   ███████║█████╗  ██████╔╝    █████╗  ██║   ██║██████╔╝██║  ███╗█████╗  
+    ██║  ██║██║   ██║   ██╔══██║██╔══╝  ██╔══██╗    ██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝  
+    ██████╔╝██║   ██║   ██║  ██║███████╗██║  ██║    ██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗
+    ╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+```
 
 <br />
-<br />
 
-# Dither Forge
+### **The complete dithering studio for retro pixel aesthetics**
 
-**The complete dithering studio for retro pixel aesthetics.**
-
-Floyd–Steinberg, Atkinson, Bayer, Halftone, Stevenson–Arce, Blue Noise — and 30+ historical hardware palettes from Game Boy to CRT phosphor. Built for pixel artists, designers, photographers and indie developers who care about authenticity.
+*Floyd–Steinberg, Atkinson, Bayer, Halftone, Blue Noise — and 30+ historical hardware palettes from Game Boy to CRT phosphor.*  
+*Built for pixel artists, designers, photographers and indie developers who care about authenticity.*
 
 <br />
 
@@ -29,6 +33,21 @@ Floyd–Steinberg, Atkinson, Bayer, Halftone, Stevenson–Arce, Blue Noise — a
 </p>
 
 <p align="center">
+  <a href="https://github.com/MatteCarro/game-dither-dream/stargazers">
+    <img src="https://img.shields.io/github/stars/MatteCarro/game-dither-dream?style=flat-square&color=F4D35E&labelColor=0d1117" alt="GitHub stars" />
+  </a>
+  <a href="https://github.com/MatteCarro/game-dither-dream/network/members">
+    <img src="https://img.shields.io/github/forks/MatteCarro/game-dither-dream?style=flat-square&color=83C5BE&labelColor=0d1117" alt="GitHub forks" />
+  </a>
+  <a href="https://github.com/MatteCarro/game-dither-dream/commits/main">
+    <img src="https://img.shields.io/github/last-commit/MatteCarro/game-dither-dream?style=flat-square&color=FF6B35&labelColor=0d1117" alt="Last commit" />
+  </a>
+  <a href="https://github.com/MatteCarro/game-dither-dream/issues">
+    <img src="https://img.shields.io/github/issues/MatteCarro/game-dither-dream?style=flat-square&color=A8DADC&labelColor=0d1117" alt="Open issues" />
+  </a>
+</p>
+
+<p align="center">
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
   <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB" alt="React" /></a>
   <a href="https://tanstack.com/start"><img src="https://img.shields.io/badge/TanStack_Start-FF4154?style=flat-square&logo=react-query&logoColor=white" alt="TanStack Start" /></a>
@@ -36,16 +55,26 @@ Floyd–Steinberg, Atkinson, Bayer, Halftone, Stevenson–Arce, Blue Noise — a
   <a href="https://bun.sh/"><img src="https://img.shields.io/badge/Bun-000000?style=flat-square&logo=bun&logoColor=white" alt="Bun" /></a>
   <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" /></a>
   <a href="https://ui.shadcn.com/"><img src="https://img.shields.io/badge/shadcn%2Fui-000000?style=flat-square&logo=shadcnui&logoColor=white" alt="shadcn/ui" /></a>
-  <a href="https://workers.cloudflare.com/"><img src="https://img.shields.io/badge/Cloudflare_Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white" alt="Cloudflare Workers" /></a>
+  <a href="https://workers.cloudflare.com/"><img src="https://img.shields.io/badge/Cloudflare-F38020?style=flat-square&logo=cloudflare&logoColor=white" alt="Cloudflare Workers" /></a>
 </p>
 
+<br />
+
 <p align="center">
-  <a href="#getting-started"><b>Quick Start</b></a> ·
-  <a href="#features"><b>Features</b></a> ·
-  <a href="#tech-stack"><b>Tech Stack</b></a> ·
-  <a href="#roadmap"><b>Roadmap</b></a> ·
-  <a href="https://github.com/MatteCarro/game-dither-dream/issues"><b>Report Bug</b></a>
+  <a href="#-quick-start"><b>Quick Start</b></a> ·
+  <a href="#-features"><b>Features</b></a> ·
+  <a href="#-comparison"><b>Comparison</b></a> ·
+  <a href="#-tech-stack"><b>Tech Stack</b></a> ·
+  <a href="#-roadmap"><b>Roadmap</b></a> ·
+  <a href="https://github.com/MatteCarro/game-dither-dream/issues"><b>Report a Bug</b></a>
 </p>
+
+<br />
+
+<img src="gif.gif" alt="Dither Forge — live demo" width="90%" />
+
+<br />
+<sub><i>Real-time dithering with palette switching, algorithm comparison and CRT preview.</i></sub>
 
 </div>
 
@@ -53,29 +82,63 @@ Floyd–Steinberg, Atkinson, Bayer, Halftone, Stevenson–Arce, Blue Noise — a
 
 ---
 
-## Why Dither Forge?
+## 📑 Table of Contents
+
+- [Why Dither Forge?](#-why-dither-forge)
+- [Features](#-features)
+- [Comparison](#-comparison)
+- [Quick Start](#-quick-start)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Performance](#-performance)
+- [Browser Support](#-browser-support)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [Acknowledgments](#-acknowledgments)
+- [License](#-license)
+
+<br />
+
+---
+
+## ✨ Why Dither Forge?
 
 Most online dithering tools give you three sliders and a "Floyd-Steinberg" button. **Dither Forge treats dithering as the craft it is.**
 
-- **Authenticity over approximation.** Every palette is extracted from real hardware — not eyeballed from screenshots. Game Boy DMG, NES, Amiga OCS, MS-DOS CGA modes, NTSC and PAL broadcast standards, CRT phosphor profiles. The colors you'd actually have seen in 1989.
-- **The full algorithm catalog.** Twelve dithering algorithms from the classic Floyd–Steinberg to recent additions like Riemersma, Blue Noise and Shiau–Fan. Each with proper parameter controls, not pre-baked presets.
-- **Pro workflow built-in.** Batch processing, side-by-side comparison, CRT preview with scanlines and analog drift, and an Algorithm Lab to design your own dither from scratch.
-- **Made for the modern web.** TypeScript + React + TanStack Start, deployed on Cloudflare Workers. Fast everywhere, no installation needed.
+<table>
+<tr>
+<td width="50%" valign="top">
 
-<br />
+### 🎨 Authenticity over approximation
 
----
+Every palette is extracted from real hardware — not eyeballed from screenshots. Game Boy DMG, NES, Amiga OCS, MS-DOS CGA modes, NTSC and PAL broadcast standards, CRT phosphor profiles. The colors you'd actually have seen in 1989.
 
-## Demo
+</td>
+<td width="50%" valign="top">
 
-<div align="center">
+### 🧬 The full algorithm catalog
 
-<img src="gif.gif" alt="Dither Forge — live demo" width="85%" />
+Twelve dithering algorithms from the classic Floyd–Steinberg to modern additions like Riemersma, Blue Noise and Shiau–Fan. Each with proper parameter controls — not pre-baked presets.
 
-<br />
-<sub><i>Real-time dithering with palette switching, algorithm comparison, and CRT preview.</i></sub>
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
 
-</div>
+### 🛠️ Pro workflow built-in
+
+Batch processing, side-by-side comparison, CRT preview with scanlines and analog drift, and an Algorithm Lab to design your own dither from scratch.
+
+</td>
+<td width="50%" valign="top">
+
+### ⚡ Made for the modern web
+
+TypeScript + React + TanStack Start, deployed on Cloudflare Workers. Fast everywhere, no installation needed, runs entirely in the browser.
+
+</td>
+</tr>
+</table>
 
 <br />
 
@@ -86,7 +149,7 @@ Most online dithering tools give you three sliders and a "Floyd-Steinberg" butto
 
 ---
 
-## Features
+## 🚀 Features
 
 ### Dithering Algorithms
 
@@ -133,7 +196,7 @@ Tune `Pattern Size`, `Threshold Bias`, `Diffusion Amount`, plus expert controls:
 <tr>
 <td valign="top" width="33%">
 
-**Consoles**
+**🕹️ Consoles**
 
 - Game Boy (DMG) — 4
 - NES — 4
@@ -145,7 +208,7 @@ Tune `Pattern Size`, `Threshold Bias`, `Diffusion Amount`, plus expert controls:
 </td>
 <td valign="top" width="33%">
 
-**Computers**
+**💻 Computers**
 
 - Commodore 64 — 16
 - Amiga OCS — 16
@@ -158,7 +221,7 @@ Tune `Pattern Size`, `Threshold Bias`, `Diffusion Amount`, plus expert controls:
 </td>
 <td valign="top" width="33%">
 
-**Display & Broadcast**
+**📺 Display & Broadcast**
 
 - NTSC / PAL Broadcast — 16
 - Trinitron — 10
@@ -202,23 +265,27 @@ A community space to discover, search and share community-made presets:
 
 ---
 
-## Tech Stack
+## 📊 Comparison
 
-| Layer | Technology |
-|-------|-----------|
-| **Framework** | [TanStack Start](https://tanstack.com/start) — React with full SSR |
-| **Language** | [TypeScript](https://www.typescriptlang.org/) |
-| **Build Tool** | [Vite](https://vitejs.dev/) |
-| **Runtime / Package Manager** | [Bun](https://bun.sh/) |
-| **Styling** | [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
-| **Deployment** | [Cloudflare Workers](https://workers.cloudflare.com/) |
-| **Quality** | ESLint + Prettier |
+How Dither Forge compares to other dithering tools:
+
+| Feature | **Dither Forge** | Online JS dither tools | Photoshop + plugins | Ditherista |
+|---------|:---:|:---:|:---:|:---:|
+| Algorithms (count) | **12+** | 2–4 | 4–8 | 90+ |
+| Authentic hardware palettes | ✅ 30+ | ❌ | ⚠️ Manual | ✅ |
+| Custom algorithm builder | ✅ | ❌ | ❌ | ❌ |
+| Batch processing | ✅ | ❌ | ✅ | ❌ |
+| Side-by-side comparison | ✅ | ❌ | ⚠️ Manual | ⚠️ |
+| CRT preview | ✅ | ❌ | ❌ | ❌ |
+| Community presets | 🔜 | ❌ | ❌ | ❌ |
+| No installation needed | ✅ | ✅ | ❌ | ❌ |
+| Free & open source | ✅ | ⚠️ Mixed | ❌ | ✅ |
 
 <br />
 
 ---
 
-## Getting Started
+## ⚡ Quick Start
 
 ### Prerequisites
 
@@ -257,7 +324,23 @@ bun run deploy     # Deploy to Cloudflare Workers
 
 ---
 
-## Project Structure
+## 🏗️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | [TanStack Start](https://tanstack.com/start) — React with full SSR |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **Build Tool** | [Vite](https://vitejs.dev/) |
+| **Runtime / Package Manager** | [Bun](https://bun.sh/) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
+| **Deployment** | [Cloudflare Workers](https://workers.cloudflare.com/) |
+| **Quality** | ESLint + Prettier |
+
+<br />
+
+---
+
+## 📁 Project Structure
 
 ```
 game-dither-dream/
@@ -280,9 +363,38 @@ game-dither-dream/
 
 ---
 
-## Roadmap
+## 📈 Performance
 
-**Shipped**
+Dither Forge is engineered for real-time interactivity:
+
+- **Canvas-based rendering** — direct pixel manipulation, no DOM overhead
+- **Web Workers** — heavy algorithms run off the main thread *(in progress)*
+- **Edge deployment** — Cloudflare Workers, latency under 50ms worldwide
+- **Zero runtime dependencies** — pure browser APIs for the core engine
+
+<br />
+
+---
+
+## 🌐 Browser Support
+
+| Browser | Minimum Version |
+|---------|----------------|
+| Chrome / Edge / Opera | 90+ |
+| Firefox | 88+ |
+| Safari | 14+ |
+| Mobile Safari | 14+ |
+| Chrome Android | 90+ |
+
+<sub>Requires a modern browser with Canvas API and ES2020 support.</sub>
+
+<br />
+
+---
+
+## 🗺️ Roadmap
+
+**✅ Shipped**
 - [x] Core dithering engine
 - [x] 12 dithering algorithms (incl. Stevenson–Arce, Shiau–Fan, Riemersma, Blue Noise)
 - [x] 30+ historical palettes
@@ -290,22 +402,24 @@ game-dither-dream/
 - [x] Batch processor
 - [x] CRT preview module
 
-**In Progress**
+**🚧 In Progress**
 - [ ] PulseDeck — drag gestures and swipe interactions
 - [ ] DitherVerse community search
 - [ ] User profiles + preset sharing
+- [ ] Web Worker optimization
 
-**Planned**
+**🔮 Planned**
 - [ ] Animation / GIF dithering support
 - [ ] Plugin SDK for custom algorithms
 - [ ] Cloudflare Workers production deploy
 - [ ] Lospec palette import
+- [ ] Native desktop app (Tauri)
 
 <br />
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Contributions, issue reports and palette suggestions are very welcome.
 
@@ -329,7 +443,7 @@ For larger changes, please open an issue first to discuss what you'd like to cha
 
 ---
 
-## Acknowledgments
+## 📜 Acknowledgments
 
 - **Robert W. Floyd & Louis Steinberg** — for the 1976 paper that started it all
 - **Bill Atkinson** — for the Atkinson dither (and a lot more)
@@ -342,7 +456,7 @@ For larger changes, please open an issue first to discuss what you'd like to cha
 
 ---
 
-## License
+## 📄 License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 
@@ -358,6 +472,8 @@ Built with ☕ and a lot of pixels by <a href="https://github.com/MatteCarro">@M
 
 <br /><br />
 
-<a href="#dither-forge"><sub>↑ Back to top</sub></a>
+<a href="#dither-forge">
+  <img src="https://img.shields.io/badge/↑_Back_to_top-0d1117?style=flat-square" alt="Back to top" />
+</a>
 
 </div>
