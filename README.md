@@ -19,16 +19,33 @@
 [![Version](https://img.shields.io/badge/VERSION-0.1.0-F4D35E?style=for-the-badge&labelColor=1a1a1a)](https://github.com/MatteCarro/game-dither-dream/releases)
 [![License](https://img.shields.io/badge/LICENSE-MIT-83C5BE?style=for-the-badge&labelColor=1a1a1a)](LICENSE)
 
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
-[![Canvas API](https://img.shields.io/badge/Canvas_API-FF6B6B?style=flat-square&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![TanStack](https://img.shields.io/badge/TanStack_Start-FF4154?style=flat-square&logo=react-query&logoColor=white)](https://tanstack.com/start)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Bun](https://img.shields.io/badge/Bun-000000?style=flat-square&logo=bun&logoColor=white)](https://bun.sh/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=flat-square&logo=shadcnui&logoColor=white)](https://ui.shadcn.com/)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare_Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
 
 [**🎮 Demo**](#) · [**📖 Docs**](#-getting-started) · [**🐛 Report Bug**](https://github.com/MatteCarro/game-dither-dream/issues) · [**💡 Request Feature**](https://github.com/MatteCarro/game-dither-dream/issues)
 
 ---
 
 </div>
+
+## 🎬 Demo
+
+<div align="center">
+
+<!-- Drop your demo GIF here -->
+<img src="docs/demo.gif" alt="Dither Forge in action" width="80%" />
+
+*Real-time dithering with live palette switching and CRT preview.*
+
+</div>
+
+---
 
 ## 🌟 What is Dither Forge?
 
@@ -50,7 +67,7 @@ Whether you're a **pixel artist** chasing authenticity, a **designer** working o
 <td width="33%" valign="top">
 
 ### 🎨 Real Algorithms
-Floyd–Steinberg, Stucki, Sierra, Atkinson, Burkes, Bayer, Halftone, Threshold and more — each with fine-grained parameter controls.
+Floyd–Steinberg, Stucki, Sierra, Atkinson, Burkes, Stevenson–Arce, Shiau–Fan, Riemersma, Blue Noise, Bayer, Halftone — each with fine-grained parameter controls.
 
 </td>
 <td width="33%" valign="top">
@@ -84,6 +101,10 @@ Batch processing, side-by-side comparison, CRT preview, custom algorithm builder
 | **Sierra** | Soft photos | Gentle, creamy look |
 | **Atkinson** | Pixel art, UI | Sharper, classic Mac aesthetic |
 | **Burkes** | General purpose | Faster Stucki variant |
+| **Stevenson–Arce** | Print reproduction | Designed for print presses |
+| **Shiau–Fan** | Edge preservation | Reduces directional artifacts |
+| **Riemersma** | Hilbert-curve scan | No directional bias |
+| **Blue Noise** | High-quality stippling | Perceptually uniform noise |
 
 </details>
 
@@ -181,20 +202,25 @@ A community space to discover, search and share community-made presets:
 
 ---
 
-## 🖼️ Screenshots
+## 🏗️ Tech Stack
 
-> *Live screenshots coming soon — alpha is in active visual development.*
+Built with a modern, edge-ready stack:
 
-<!-- Once you have screenshots, drop them like this:
-<div align="center">
-  <img src="docs/screenshots/editor.png" width="80%" alt="Editor view" />
-  <img src="docs/screenshots/algorithm-lab.png" width="80%" alt="Algorithm Lab" />
-</div>
--->
+- **Framework** — [TanStack Start](https://tanstack.com/start) (React + SSR)
+- **Language** — [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool** — [Vite](https://vitejs.dev/)
+- **Runtime / Package Manager** — [Bun](https://bun.sh/)
+- **Styling** — [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
+- **Deployment** — [Cloudflare Workers](https://workers.cloudflare.com/)
+- **Linting / Formatting** — ESLint + Prettier
 
 ---
 
 ## 🚦 Getting Started
+
+### Prerequisites
+
+- [Bun](https://bun.sh/) `≥ 1.0` *(or Node 18+ if you prefer npm/pnpm)*
 
 ### Quick Start
 
@@ -203,20 +229,48 @@ A community space to discover, search and share community-made presets:
 git clone https://github.com/MatteCarro/game-dither-dream.git
 cd game-dither-dream
 
-# 2. Open in your browser
-# Option A — using Python's built-in server
-python3 -m http.server 8080
+# 2. Install dependencies
+bun install
 
-# Option B — using Node's serve package
-npx serve .
-
-# Option C — just open index.html directly
+# 3. Start the dev server
+bun run dev
 ```
 
-Then visit **`http://localhost:8080`** and start dithering.
+Then open **`http://localhost:3000`** in your browser.
+
+### Available Scripts
+
+```bash
+bun run dev        # Start the development server
+bun run build      # Build for production
+bun run preview    # Preview the production build
+bun run lint       # Run ESLint
+bun run deploy     # Deploy to Cloudflare Workers
+```
 
 > [!TIP]
-> No build step, no dependencies, no toolchain. Pure web standards — open the file and it just works.
+> Using npm or pnpm? Just replace `bun` with your package manager of choice — all scripts are standard.
+
+---
+
+## 📁 Project Structure
+
+```
+game-dither-dream/
+├── src/
+│   ├── components/ui/    # shadcn/ui components
+│   ├── hooks/            # Custom React hooks
+│   ├── lib/              # Dithering algorithms & core logic
+│   ├── routes/           # TanStack Router file-based routes
+│   ├── router.tsx        # Router configuration
+│   ├── server.ts         # SSR entry point
+│   ├── start.ts          # Application bootstrap
+│   └── styles.css        # Global styles
+├── components.json       # shadcn/ui config
+├── vite.config.ts        # Vite configuration
+├── wrangler.jsonc        # Cloudflare Workers config
+└── tsconfig.json         # TypeScript configuration
+```
 
 ---
 
@@ -227,11 +281,12 @@ Then visit **`http://localhost:8080`** and start dithering.
 - [x] Algorithm Lab with expert controls
 - [x] Batch processor
 - [x] CRT preview module
+- [x] Advanced algorithms (Stevenson–Arce, Shiau–Fan, Riemersma, Blue Noise)
 - [ ] Real drag gestures for PulseDeck
 - [ ] User profiles + community preset sharing
 - [ ] Animation / GIF dithering support
 - [ ] Plugin SDK for custom algorithms
-- [ ] Native desktop app (Tauri / Electron)
+- [ ] Cloudflare Workers deployment
 
 ---
 
@@ -253,6 +308,7 @@ For larger changes, please open an issue first to discuss what you'd like to cha
 
 - **Robert W. Floyd & Louis Steinberg** — for the 1976 paper that started it all
 - **Bill Atkinson** — for the Atkinson dither (and a lot more)
+- **Bart Wronski** — for blue noise dithering research
 - **The Lospec community** — for documenting historical palettes
 - **PICO-8** by Lexaloffle — palette inspiration
 - All retro hardware engineers who, decades ago, accidentally created an aesthetic
