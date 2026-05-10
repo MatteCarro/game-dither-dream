@@ -71,7 +71,7 @@
 
 <br />
 
-<img src="gif.gif" alt="Dither Forge — live demo" width="90%" />
+<img src="docs/gif.gif" alt="Dither Forge — live demo" width="90%" />
 
 <br />
 <sub><i>Real-time dithering with palette switching, algorithm comparison and CRT preview.</i></sub>
