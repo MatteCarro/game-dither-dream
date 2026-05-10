@@ -1,242 +1,244 @@
 <div align="center">
 
-```
-██████╗ ██╗████████╗██╗  ██╗███████╗██████╗     ███████╗ ██████╗ ██████╗  ██████╗ ███████╗
-██╔══██╗██║╚══██╔══╝██║  ██║██╔════╝██╔══██╗    ██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝
-██║  ██║██║   ██║   ███████║█████╗  ██████╔╝    █████╗  ██║   ██║██████╔╝██║  ███╗█████╗  
-██║  ██║██║   ██║   ██╔══██║██╔══╝  ██╔══██╗    ██╔══╝  ██║   ██║██╔══██╗██║   ██║██╔══╝  
-██████╔╝██║   ██║   ██║  ██║███████╗██║  ██║    ██║     ╚██████╔╝██║  ██║╚██████╔╝███████╗
-╚═════╝ ╚═╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝    ╚═╝      ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝
-```
+<br />
 
-### **Retro Pixel Dithering Studio**
+<!-- LOGO / BANNER AREA -->
+<img src="gif.gif" alt="Dither Forge" width="100%" />
 
-*Forge authentic retro aesthetics — pixel art, halftone, CRT phosphor, 8-bit consoles.*
+<br />
+<br />
+
+# Dither Forge
+
+**The complete dithering studio for retro pixel aesthetics.**
+
+Floyd–Steinberg, Atkinson, Bayer, Halftone, Stevenson–Arce, Blue Noise — and 30+ historical hardware palettes from Game Boy to CRT phosphor. Built for pixel artists, designers, photographers and indie developers who care about authenticity.
 
 <br />
 
-[![Status](https://img.shields.io/badge/STATUS-ALPHA-FF6B35?style=for-the-badge&labelColor=1a1a1a)](https://github.com/MatteCarro/game-dither-dream)
-[![Version](https://img.shields.io/badge/VERSION-0.1.0-F4D35E?style=for-the-badge&labelColor=1a1a1a)](https://github.com/MatteCarro/game-dither-dream/releases)
-[![License](https://img.shields.io/badge/LICENSE-MIT-83C5BE?style=for-the-badge&labelColor=1a1a1a)](LICENSE)
+<p align="center">
+  <a href="https://github.com/MatteCarro/game-dither-dream/releases">
+    <img src="https://img.shields.io/badge/STATUS-ALPHA-FF6B35?style=for-the-badge&labelColor=0d1117" alt="Status: Alpha" />
+  </a>
+  <a href="https://github.com/MatteCarro/game-dither-dream/releases">
+    <img src="https://img.shields.io/badge/VERSION-0.1.0-F4D35E?style=for-the-badge&labelColor=0d1117" alt="Version 0.1.0" />
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/LICENSE-MIT-83C5BE?style=for-the-badge&labelColor=0d1117" alt="License: MIT" />
+  </a>
+</p>
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://react.dev/)
-[![TanStack](https://img.shields.io/badge/TanStack_Start-FF4154?style=flat-square&logo=react-query&logoColor=white)](https://tanstack.com/start)
-[![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Bun](https://img.shields.io/badge/Bun-000000?style=flat-square&logo=bun&logoColor=white)](https://bun.sh/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?style=flat-square&logo=shadcnui&logoColor=white)](https://ui.shadcn.com/)
-[![Cloudflare](https://img.shields.io/badge/Cloudflare_Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white)](https://workers.cloudflare.com/)
+<p align="center">
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
+  <a href="https://react.dev/"><img src="https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB" alt="React" /></a>
+  <a href="https://tanstack.com/start"><img src="https://img.shields.io/badge/TanStack_Start-FF4154?style=flat-square&logo=react-query&logoColor=white" alt="TanStack Start" /></a>
+  <a href="https://vitejs.dev/"><img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" /></a>
+  <a href="https://bun.sh/"><img src="https://img.shields.io/badge/Bun-000000?style=flat-square&logo=bun&logoColor=white" alt="Bun" /></a>
+  <a href="https://tailwindcss.com/"><img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" /></a>
+  <a href="https://ui.shadcn.com/"><img src="https://img.shields.io/badge/shadcn%2Fui-000000?style=flat-square&logo=shadcnui&logoColor=white" alt="shadcn/ui" /></a>
+  <a href="https://workers.cloudflare.com/"><img src="https://img.shields.io/badge/Cloudflare_Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white" alt="Cloudflare Workers" /></a>
+</p>
 
-[**🎮 Demo**](#) · [**📖 Docs**](#-getting-started) · [**🐛 Report Bug**](https://github.com/MatteCarro/game-dither-dream/issues) · [**💡 Request Feature**](https://github.com/MatteCarro/game-dither-dream/issues)
-
----
+<p align="center">
+  <a href="#getting-started"><b>Quick Start</b></a> ·
+  <a href="#features"><b>Features</b></a> ·
+  <a href="#tech-stack"><b>Tech Stack</b></a> ·
+  <a href="#roadmap"><b>Roadmap</b></a> ·
+  <a href="https://github.com/MatteCarro/game-dither-dream/issues"><b>Report Bug</b></a>
+</p>
 
 </div>
 
-## 🎬 Demo
+<br />
+
+---
+
+## Why Dither Forge?
+
+Most online dithering tools give you three sliders and a "Floyd-Steinberg" button. **Dither Forge treats dithering as the craft it is.**
+
+- **Authenticity over approximation.** Every palette is extracted from real hardware — not eyeballed from screenshots. Game Boy DMG, NES, Amiga OCS, MS-DOS CGA modes, NTSC and PAL broadcast standards, CRT phosphor profiles. The colors you'd actually have seen in 1989.
+- **The full algorithm catalog.** Twelve dithering algorithms from the classic Floyd–Steinberg to recent additions like Riemersma, Blue Noise and Shiau–Fan. Each with proper parameter controls, not pre-baked presets.
+- **Pro workflow built-in.** Batch processing, side-by-side comparison, CRT preview with scanlines and analog drift, and an Algorithm Lab to design your own dither from scratch.
+- **Made for the modern web.** TypeScript + React + TanStack Start, deployed on Cloudflare Workers. Fast everywhere, no installation needed.
+
+<br />
+
+---
+
+## Demo
 
 <div align="center">
 
-<!-- Drop your demo GIF here -->
-<img src="docs/demo.gif" alt="Dither Forge in action" width="80%" />
+<img src="gif.gif" alt="Dither Forge — live demo" width="85%" />
 
-*Real-time dithering with live palette switching and CRT preview.*
+<br />
+<sub><i>Real-time dithering with palette switching, algorithm comparison, and CRT preview.</i></sub>
 
 </div>
-
----
-
-## 🌟 What is Dither Forge?
-
-**Dither Forge** is a creative editor built around **dithering** — the image-processing technique that reduces a picture's color palette while producing the iconic textures of retro digital aesthetics. From Game Boy greens to phosphor-glow CRT monitors, from offset-print halftones to demoscene-style ordered patterns, Dither Forge gives you the tools to recreate them all.
-
-Whether you're a **pixel artist** chasing authenticity, a **designer** working on retro-themed branding, a **photographer** looking for analog-style processing, or an **indie game dev** preparing assets — this is your forge.
 
 <br />
 
 > [!NOTE]
-> Dither Forge is in **active alpha development**. Features and APIs may change. Feedback and bug reports are extremely welcome.
+> Dither Forge is in **active alpha development**. APIs and UI may change between versions. Bug reports and palette suggestions are very welcome.
+
+<br />
 
 ---
 
-## ⚡ Highlights
+## Features
+
+### Dithering Algorithms
 
 <table>
 <tr>
-<td width="33%" valign="top">
+<th align="left" width="50%">Error Diffusion</th>
+<th align="left" width="50%">Ordered & Pattern</th>
+</tr>
+<tr>
+<td valign="top">
 
-### 🎨 Real Algorithms
-Floyd–Steinberg, Stucki, Sierra, Atkinson, Burkes, Stevenson–Arce, Shiau–Fan, Riemersma, Blue Noise, Bayer, Halftone — each with fine-grained parameter controls.
+- **Floyd–Steinberg** — the canonical 1976 algorithm
+- **Stucki** — wider error spread, smoother gradients
+- **Sierra** — gentle, photographic
+- **Atkinson** — sharper, classic Macintosh feel
+- **Burkes** — fast, balanced
+- **Stevenson–Arce** — designed for offset print
+- **Shiau–Fan** — reduces directional artifacts
+- **Riemersma** — Hilbert curve scan, no bias
+- **Blue Noise** — perceptually uniform stippling
 
 </td>
-<td width="33%" valign="top">
+<td valign="top">
 
-### 🎮 Authentic Palettes
-30+ historical palettes from real hardware: Game Boy, NES, C64, Amiga, ZX Spectrum, EGA, CRT phosphor and more.
+- **Bayer 2×2 / 4×4 / 8×8** — predictable, demoscene-friendly
+- **Halftone** — print and comic-book look
+- **Threshold** — pure bitmap conversion
 
-</td>
-<td width="33%" valign="top">
+<br />
 
-### 🛠️ Pro Workflow
-Batch processing, side-by-side comparison, CRT preview, custom algorithm builder, and gallery management.
+**Custom Algorithms** *(Algorithm Lab)*
+
+Tune `Pattern Size`, `Threshold Bias`, `Diffusion Amount`, plus expert controls: `Diffusion Weight`, `Tonal Protection`, `Edge Preservation`, `Grain Shaping`.
 
 </td>
 </tr>
 </table>
 
----
-
-## 🚀 Features
-
-### 🧬 Dithering Algorithms
-
-<details open>
-<summary><b>Error Diffusion</b></summary>
-
-| Algorithm | Best for | Notes |
-|-----------|----------|-------|
-| **Floyd–Steinberg** | Photos, gradients | The classic — balanced detail and noise |
-| **Stucki** | High-detail photography | Wider error spread, smoother result |
-| **Sierra** | Soft photos | Gentle, creamy look |
-| **Atkinson** | Pixel art, UI | Sharper, classic Mac aesthetic |
-| **Burkes** | General purpose | Faster Stucki variant |
-| **Stevenson–Arce** | Print reproduction | Designed for print presses |
-| **Shiau–Fan** | Edge preservation | Reduces directional artifacts |
-| **Riemersma** | Hilbert-curve scan | No directional bias |
-| **Blue Noise** | High-quality stippling | Perceptually uniform noise |
-
-</details>
-
-<details>
-<summary><b>Ordered Dithering</b></summary>
-
-| Algorithm | Best for | Notes |
-|-----------|----------|-------|
-| **Bayer 2×2 / 4×4 / 8×8** | Pixel art, demoscene | Predictable repeating pattern |
-| **Halftone** | Print look, posterization | Newspaper / comic-book vibe |
-| **Threshold** | Bitmap conversion | Pure black & white logic |
-
-</details>
-
-<details>
-<summary><b>Custom Algorithms (Algorithm Lab)</b></summary>
-
-Build your own dither by combining:
-- `Pattern Size` · `Threshold Bias` · `Diffusion Amount`
-- **Expert mode**: `Diffusion Weight` · `Tonal Protection` · `Edge Preservation` · `Grain Shaping`
-
-</details>
-
 <br />
 
-### 🎨 Palette Library
+### Palette Library
 
 <table>
 <tr>
-<td valign="top" width="50%">
+<td valign="top" width="33%">
 
-**🕹️ Consoles**
-- Game Boy (DMG) — *4 colors*
-- NES — *4 colors*
-- Sega Master System — *8 colors*
-- Atari 2600 — *16 colors*
-- Neo Geo — *16 colors*
-- PICO-8 — *16 colors*
+**Consoles**
 
-**💻 Computers**
-- Commodore 64 — *16 colors*
-- Amiga OCS — *16 colors*
-- Apple II — *16 colors*
-- ZX Spectrum — *15 colors*
+- Game Boy (DMG) — 4
+- NES — 4
+- Sega Master System — 8
+- Atari 2600 — 16
+- Neo Geo — 16
+- PICO-8 — 16
+
+</td>
+<td valign="top" width="33%">
+
+**Computers**
+
+- Commodore 64 — 16
+- Amiga OCS — 16
+- Apple II — 16
+- ZX Spectrum — 15
 - Macintosh 1-bit / 4-bit
-- Atari ST · MSX · BBC Micro · TRS-80
+- Atari ST · MSX
+- BBC Micro · TRS-80
 
 </td>
-<td valign="top" width="50%">
+<td valign="top" width="33%">
 
-**🖥️ MS-DOS / PC**
-- MS-DOS CGA — *4 colors*
-- MS-DOS CGA Mode 0 — *4 colors*
-- EGA — *16 colors*
-- VGA 16 — *16 colors*
+**Display & Broadcast**
 
-**📺 Display & Broadcast**
-- NTSC Broadcast — *16 colors*
-- PAL Broadcast — *16 colors*
-- Trinitron — *10 colors*
-- TV Composite — *8 colors*
-- CRT Phosphor Green — *8 colors*
-- CRT Amber — *8 colors*
-- Plasma Burn — *8 colors*
+- NTSC / PAL Broadcast — 16
+- Trinitron — 10
+- TV Composite — 8
+- CRT Phosphor Green — 8
+- CRT Amber — 8
+- Plasma Burn — 8
+- MS-DOS CGA / EGA / VGA
 
 </td>
 </tr>
 </table>
 
-> All palettes are extracted from real hardware specifications, not approximations.
+<sub><i>All palettes are extracted from real hardware specifications. Custom palettes can be imported from Lospec.</i></sub>
 
 <br />
 
-### 🛠️ Workspace
+### Workspace Modules
 
-| Module | Purpose |
-|--------|---------|
-| 🖊️ **Editor** | Single-image dithering with real-time preview |
-| 📚 **Batch Processor** | Apply presets to entire folders at once |
-| 🖼️ **Gallery** | Browse and manage processed outputs |
-| 🔀 **Compare** | Side-by-side comparison between algorithms |
-| 📺 **CRT Preview** | Simulate vintage monitors — scanlines, glow, curvature, analog drift |
-| 💾 **Export** | Multiple formats and resolutions |
-| 🧪 **Algorithm Lab** | Design your own algorithms with expert controls |
+| Module | What it does |
+|--------|--------------|
+| **Editor** | Single-image dithering with real-time preview and full parameter control |
+| **Batch Processor** | Apply presets to entire folders — perfect for asset pipelines |
+| **Gallery** | Browse, organize and tag your processed outputs |
+| **Compare** | Side-by-side comparison between any two algorithms or palettes |
+| **CRT Preview** | Simulate vintage monitors — scanlines, glow, curvature, analog drift |
+| **Algorithm Lab** | Design custom dithering algorithms with expert-level controls |
+| **Export** | Multiple formats and resolutions, ready for production |
 
 <br />
 
-### 🌐 DitherVerse — *Coming Soon*
+### Coming Soon — DitherVerse
 
 A community space to discover, search and share community-made presets:
 
-- 💫 **PulseDeck** — swipe-based preset discovery
-- 🎨 **Color Search** — find presets by dominant color
-- ⚙️ **Algorithm Search** — find presets compatible with your favorite algorithm
+- **PulseDeck** — swipe-based preset discovery
+- **Color Search** — find presets by dominant color
+- **Algorithm Search** — find presets compatible with your favorite algorithm
+
+<br />
 
 ---
 
-## 🏗️ Tech Stack
+## Tech Stack
 
-Built with a modern, edge-ready stack:
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | [TanStack Start](https://tanstack.com/start) — React with full SSR |
+| **Language** | [TypeScript](https://www.typescriptlang.org/) |
+| **Build Tool** | [Vite](https://vitejs.dev/) |
+| **Runtime / Package Manager** | [Bun](https://bun.sh/) |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
+| **Deployment** | [Cloudflare Workers](https://workers.cloudflare.com/) |
+| **Quality** | ESLint + Prettier |
 
-- **Framework** — [TanStack Start](https://tanstack.com/start) (React + SSR)
-- **Language** — [TypeScript](https://www.typescriptlang.org/)
-- **Build Tool** — [Vite](https://vitejs.dev/)
-- **Runtime / Package Manager** — [Bun](https://bun.sh/)
-- **Styling** — [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
-- **Deployment** — [Cloudflare Workers](https://workers.cloudflare.com/)
-- **Linting / Formatting** — ESLint + Prettier
+<br />
 
 ---
 
-## 🚦 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) `≥ 1.0` *(or Node 18+ if you prefer npm/pnpm)*
+- [Bun](https://bun.sh/) `≥ 1.0` *(or Node 18+ with npm/pnpm/yarn)*
 
-### Quick Start
+### Installation
 
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/MatteCarro/game-dither-dream.git
 cd game-dither-dream
 
-# 2. Install dependencies
+# Install dependencies
 bun install
 
-# 3. Start the dev server
+# Start the development server
 bun run dev
 ```
 
-Then open **`http://localhost:3000`** in your browser.
+Open **`http://localhost:3000`** and start dithering.
 
 ### Available Scripts
 
@@ -249,11 +251,13 @@ bun run deploy     # Deploy to Cloudflare Workers
 ```
 
 > [!TIP]
-> Using npm or pnpm? Just replace `bun` with your package manager of choice — all scripts are standard.
+> Prefer npm or pnpm? Replace `bun` with your package manager — all scripts are standard.
+
+<br />
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 game-dither-dream/
@@ -261,7 +265,7 @@ game-dither-dream/
 │   ├── components/ui/    # shadcn/ui components
 │   ├── hooks/            # Custom React hooks
 │   ├── lib/              # Dithering algorithms & core logic
-│   ├── routes/           # TanStack Router file-based routes
+│   ├── routes/           # File-based routing (TanStack Router)
 │   ├── router.tsx        # Router configuration
 │   ├── server.ts         # SSR entry point
 │   ├── start.ts          # Application bootstrap
@@ -272,61 +276,88 @@ game-dither-dream/
 └── tsconfig.json         # TypeScript configuration
 ```
 
+<br />
+
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
+**Shipped**
 - [x] Core dithering engine
-- [x] Palette library (30+ historical palettes)
+- [x] 12 dithering algorithms (incl. Stevenson–Arce, Shiau–Fan, Riemersma, Blue Noise)
+- [x] 30+ historical palettes
 - [x] Algorithm Lab with expert controls
 - [x] Batch processor
 - [x] CRT preview module
-- [x] Advanced algorithms (Stevenson–Arce, Shiau–Fan, Riemersma, Blue Noise)
-- [ ] Real drag gestures for PulseDeck
-- [ ] User profiles + community preset sharing
+
+**In Progress**
+- [ ] PulseDeck — drag gestures and swipe interactions
+- [ ] DitherVerse community search
+- [ ] User profiles + preset sharing
+
+**Planned**
 - [ ] Animation / GIF dithering support
 - [ ] Plugin SDK for custom algorithms
-- [ ] Cloudflare Workers deployment
+- [ ] Cloudflare Workers production deploy
+- [ ] Lospec palette import
+
+<br />
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions, issue reports and palette suggestions are very welcome.
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/amazing-palette`)
-3. Commit your changes (`git commit -m 'Add Amiga AGA palette'`)
-4. Push to the branch (`git push origin feature/amazing-palette`)
-5. Open a Pull Request
+```bash
+# 1. Fork the repository
+# 2. Create a feature branch
+git checkout -b feature/amazing-palette
+
+# 3. Commit your changes
+git commit -m "Add Amiga AGA palette"
+
+# 4. Push to the branch
+git push origin feature/amazing-palette
+
+# 5. Open a Pull Request
+```
 
 For larger changes, please open an issue first to discuss what you'd like to change.
 
+<br />
+
 ---
 
-## 📜 Acknowledgments
+## Acknowledgments
 
 - **Robert W. Floyd & Louis Steinberg** — for the 1976 paper that started it all
 - **Bill Atkinson** — for the Atkinson dither (and a lot more)
-- **Bart Wronski** — for blue noise dithering research
+- **Christoph Peters & Bart Wronski** — for foundational work on blue noise dithering
 - **The Lospec community** — for documenting historical palettes
 - **PICO-8** by Lexaloffle — palette inspiration
-- All retro hardware engineers who, decades ago, accidentally created an aesthetic
+- All retro hardware engineers who, decades ago, accidentally invented an aesthetic
+
+<br />
 
 ---
 
-## 📄 License
+## License
 
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
+
+<br />
 
 ---
 
 <div align="center">
 
-### Made with ☕ and a lot of pixels
+<sub>
+Built with ☕ and a lot of pixels by <a href="https://github.com/MatteCarro">@MatteCarro</a> · 2026
+</sub>
 
-**[⬆ back to top](#)**
+<br /><br />
 
-<sub>Built by [@MatteCarro](https://github.com/MatteCarro) · 2026</sub>
+<a href="#dither-forge"><sub>↑ Back to top</sub></a>
 
 </div>
