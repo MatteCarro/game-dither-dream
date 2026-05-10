@@ -2,6 +2,11 @@
 
 <br />
 
+<img src="docs/gif.gif" alt="Dither Forge" width="100%" />
+
+<br />
+<br />
+
 ```
     ██████╗ ██╗████████╗██╗  ██╗███████╗██████╗     ███████╗ ██████╗ ██████╗  ██████╗ ███████╗
     ██╔══██╗██║╚══██╔══╝██║  ██║██╔════╝██╔══██╗    ██╔════╝██╔═══██╗██╔══██╗██╔════╝ ██╔════╝
@@ -13,7 +18,12 @@
 
 <br />
 
-### **The complete dithering studio for retro pixel aesthetics**
+<a href="https://github.com/MatteCarro/game-dither-dream">
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&duration=2800&pause=600&color=F4D35E&center=true&vCenter=true&width=720&lines=The+complete+dithering+studio.;Authentic+retro+pixel+aesthetics.;30%2B+real+hardware+palettes.;12%2B+algorithms+with+expert+controls." alt="Dither Forge tagline" />
+</a>
+
+<br />
+<br />
 
 *Floyd–Steinberg, Atkinson, Bayer, Halftone, Blue Noise — and 30+ historical hardware palettes from Game Boy to CRT phosphor.*  
 *Built for pixel artists, designers, photographers and indie developers who care about authenticity.*
@@ -30,6 +40,9 @@
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/LICENSE-MIT-83C5BE?style=for-the-badge&labelColor=0d1117" alt="License: MIT" />
   </a>
+  <a href="https://github.com/MatteCarro/game-dither-dream">
+    <img src="https://img.shields.io/badge/PR's-WELCOME-A8DADC?style=for-the-badge&labelColor=0d1117" alt="PRs Welcome" />
+  </a>
 </p>
 
 <p align="center">
@@ -44,6 +57,9 @@
   </a>
   <a href="https://github.com/MatteCarro/game-dither-dream/issues">
     <img src="https://img.shields.io/github/issues/MatteCarro/game-dither-dream?style=flat-square&color=A8DADC&labelColor=0d1117" alt="Open issues" />
+  </a>
+  <a href="https://github.com/MatteCarro/game-dither-dream">
+    <img src="https://img.shields.io/github/repo-size/MatteCarro/game-dither-dream?style=flat-square&color=F4D35E&labelColor=0d1117" alt="Repo size" />
   </a>
 </p>
 
@@ -61,41 +77,50 @@
 <br />
 
 <p align="center">
-  <a href="#-quick-start"><b>Quick Start</b></a> ·
-  <a href="#-features"><b>Features</b></a> ·
-  <a href="#-comparison"><b>Comparison</b></a> ·
-  <a href="#-tech-stack"><b>Tech Stack</b></a> ·
-  <a href="#-roadmap"><b>Roadmap</b></a> ·
-  <a href="https://github.com/MatteCarro/game-dither-dream/issues"><b>Report a Bug</b></a>
+  <a href="#-quick-start"><b>Quick Start</b></a> •
+  <a href="#-features"><b>Features</b></a> •
+  <a href="#-architecture"><b>Architecture</b></a> •
+  <a href="#-comparison"><b>Comparison</b></a> •
+  <a href="#-tech-stack"><b>Tech Stack</b></a> •
+  <a href="#-roadmap"><b>Roadmap</b></a> •
+  <a href="https://github.com/MatteCarro/game-dither-dream/issues"><b>Report Bug</b></a>
 </p>
 
 <br />
 
-<img src="docs/gif.gif" alt="Dither Forge — live demo" width="90%" />
-
-<br />
-<sub><i>Real-time dithering with palette switching, algorithm comparison and CRT preview.</i></sub>
+<img src="https://capsule-render.vercel.app/api?type=rect&color=F4D35E&height=2&section=header" width="100%" />
 
 </div>
 
 <br />
 
----
-
 ## 📑 Table of Contents
 
-- [Why Dither Forge?](#-why-dither-forge)
-- [Features](#-features)
-- [Comparison](#-comparison)
-- [Quick Start](#-quick-start)
-- [Tech Stack](#-tech-stack)
-- [Project Structure](#-project-structure)
-- [Performance](#-performance)
-- [Browser Support](#-browser-support)
-- [Roadmap](#-roadmap)
-- [Contributing](#-contributing)
-- [Acknowledgments](#-acknowledgments)
-- [License](#-license)
+<table>
+<tr>
+<td valign="top" width="50%">
+
+- [✨ Why Dither Forge?](#-why-dither-forge)
+- [🎬 Demo](#-demo)
+- [🚀 Features](#-features)
+- [🏛️ Architecture](#-architecture)
+- [📊 How It Compares](#-how-it-compares)
+- [⚡ Quick Start](#-quick-start)
+
+</td>
+<td valign="top" width="50%">
+
+- [💻 Code Examples](#-code-examples)
+- [🏗️ Tech Stack](#-tech-stack)
+- [📁 Project Structure](#-project-structure)
+- [📈 Performance](#-performance)
+- [🌐 Browser Support](#-browser-support)
+- [🗺️ Roadmap](#-roadmap)
+- [🤝 Contributing](#-contributing)
+
+</td>
+</tr>
+</table>
 
 <br />
 
@@ -103,7 +128,10 @@
 
 ## ✨ Why Dither Forge?
 
-Most online dithering tools give you three sliders and a "Floyd-Steinberg" button. **Dither Forge treats dithering as the craft it is.**
+> *"Most online dithering tools give you three sliders and a 'Floyd-Steinberg' button.  
+> **Dither Forge treats dithering as the craft it is.**"*
+
+<br />
 
 <table>
 <tr>
@@ -116,9 +144,9 @@ Every palette is extracted from real hardware — not eyeballed from screenshots
 </td>
 <td width="50%" valign="top">
 
-### 🧬 The full algorithm catalog
+### 🧬 Curated algorithm catalog
 
-Twelve dithering algorithms from the classic Floyd–Steinberg to modern additions like Riemersma, Blue Noise and Shiau–Fan. Each with proper parameter controls — not pre-baked presets.
+Twelve carefully chosen dithering algorithms — from the canonical Floyd–Steinberg to modern additions like Riemersma, Blue Noise and Shiau–Fan. Quality over quantity, each with proper parameter controls.
 
 </td>
 </tr>
@@ -127,14 +155,14 @@ Twelve dithering algorithms from the classic Floyd–Steinberg to modern additio
 
 ### 🛠️ Pro workflow built-in
 
-Batch processing, side-by-side comparison, CRT preview with scanlines and analog drift, and an Algorithm Lab to design your own dither from scratch.
+Batch processing, side-by-side comparison, CRT preview with scanlines and analog drift, and an Algorithm Lab to design your own dither from scratch. Everything you'd build a custom workflow for, already integrated.
 
 </td>
 <td width="50%" valign="top">
 
 ### ⚡ Made for the modern web
 
-TypeScript + React + TanStack Start, deployed on Cloudflare Workers. Fast everywhere, no installation needed, runs entirely in the browser.
+TypeScript + React + TanStack Start, deployed on Cloudflare Workers. No installation, no Photoshop subscription, no command-line wizardry. Open a browser, drag an image, done.
 
 </td>
 </tr>
@@ -149,9 +177,24 @@ TypeScript + React + TanStack Start, deployed on Cloudflare Workers. Fast everyw
 
 ---
 
+## 🎬 Demo
+
+<div align="center">
+
+<img src="docs/gif.gif" alt="Dither Forge — live demo" width="85%" />
+
+<br />
+<sub><i>Real-time dithering with palette switching, algorithm comparison and CRT preview.</i></sub>
+
+</div>
+
+<br />
+
+---
+
 ## 🚀 Features
 
-### Dithering Algorithms
+### 🧬 Dithering Algorithms
 
 <table>
 <tr>
@@ -190,7 +233,7 @@ Tune `Pattern Size`, `Threshold Bias`, `Diffusion Amount`, plus expert controls:
 
 <br />
 
-### Palette Library
+### 🎨 Palette Library
 
 <table>
 <tr>
@@ -239,7 +282,7 @@ Tune `Pattern Size`, `Threshold Bias`, `Diffusion Amount`, plus expert controls:
 
 <br />
 
-### Workspace Modules
+### 🛠️ Workspace Modules
 
 | Module | What it does |
 |--------|--------------|
@@ -253,33 +296,86 @@ Tune `Pattern Size`, `Threshold Bias`, `Diffusion Amount`, plus expert controls:
 
 <br />
 
-### Coming Soon — DitherVerse
+### 🌐 Coming Soon — DitherVerse
 
 A community space to discover, search and share community-made presets:
 
-- **PulseDeck** — swipe-based preset discovery
-- **Color Search** — find presets by dominant color
-- **Algorithm Search** — find presets compatible with your favorite algorithm
+- 💫 **PulseDeck** — swipe-based preset discovery
+- 🎨 **Color Search** — find presets by dominant color
+- ⚙️ **Algorithm Search** — find presets compatible with your favorite algorithm
 
 <br />
 
 ---
 
-## 📊 Comparison
+## 🏛️ Architecture
 
-How Dither Forge compares to other dithering tools:
+How an image flows through Dither Forge:
 
-| Feature | **Dither Forge** | Online JS dither tools | Photoshop + plugins | Ditherista |
-|---------|:---:|:---:|:---:|:---:|
-| Algorithms (count) | **12+** | 2–4 | 4–8 | 90+ |
-| Authentic hardware palettes | ✅ 30+ | ❌ | ⚠️ Manual | ✅ |
-| Custom algorithm builder | ✅ | ❌ | ❌ | ❌ |
-| Batch processing | ✅ | ❌ | ✅ | ❌ |
-| Side-by-side comparison | ✅ | ❌ | ⚠️ Manual | ⚠️ |
-| CRT preview | ✅ | ❌ | ❌ | ❌ |
-| Community presets | 🔜 | ❌ | ❌ | ❌ |
-| No installation needed | ✅ | ✅ | ❌ | ❌ |
-| Free & open source | ✅ | ⚠️ Mixed | ❌ | ✅ |
+```
+┌─────────────────┐
+│  Source Image   │  ← PNG / JPG / WEBP upload
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐      ┌──────────────────┐
+│  Color Pipeline │ ◄──── │  Palette Library │  ← 30+ historical palettes
+│  (sRGB → Lab)   │      └──────────────────┘
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐      ┌──────────────────┐
+│ Dither Engine   │ ◄──── │  Algorithm Lab   │  ← 12+ algorithms
+│ (Canvas-based)  │      └──────────────────┘     custom parameters
+└────────┬────────┘
+         │
+         ├──────────────► Live Preview
+         ├──────────────► CRT Preview (scanlines, glow, curvature)
+         ├──────────────► Batch Output (ZIP)
+         └──────────────► Export (PNG / GIF / WEBP)
+```
+
+<br />
+
+---
+
+## 📊 How It Compares
+
+Honest, researched comparison with other dithering tools. Each tool has its strengths — Dither Forge's bet is on **integrated workflow** and **historical authenticity**, not raw algorithm count.
+
+<br />
+
+| Feature | **Dither Forge** | Ditherista | Other plugins | Photoshop *(native)* | Web tools *(dithermark, ditherit.com)* |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Algorithms** | 12+ curated | 90+ | Varies | 4 | 5–10 |
+| **Authentic retro palettes** | ✅ 30+ built-in | ⚠️ Custom only | ⚠️ Varies | ❌ Manual import | ⚠️ Few |
+| **Custom algorithm builder** | ✅ Algorithm Lab | ❌ | ⚠️ Limited | ❌ | ❌ |
+| **CRT preview** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Side-by-side comparison** | ✅ | ❌ | ❌ | ⚠️ Manual | ❌ |
+| **Batch processing** | ✅ | ❌ | ⚠️ Via Actions | ⚠️ Via Actions | ❌ |
+| **Animation / video** | 🔜 Planned | ❌ | ⚠️ Varies | ⚠️ Frame by frame | ❌ |
+| **Community presets** | 🔜 Planned | ❌ | ❌ | ❌ | ❌ |
+| **Platform** | Browser (any OS) | Win / macOS / Linux | Photoshop-dependent | Win / macOS | Browser |
+| **Installation needed** | ❌ No | ✅ Required | ✅ Required | ✅ Required | ❌ No |
+| **License** | MIT (free) | GPL (free) | Commercial | Commercial subscription | Mixed |
+
+<br />
+
+**Legend:** ✅ Full support · ⚠️ Partial / workaround · ❌ Not supported · 🔜 In roadmap
+
+<details>
+<summary><b>📌 Sources & methodology</b></summary>
+
+<br />
+
+- **Ditherista** — [robertkist/ditherista](https://github.com/robertkist/ditherista) — claims "over 90 dithering methods" (B&W focus, custom palette import supported)
+- **Other plugins** — third-party Photoshop / image editor plugins (commercial, capabilities vary by vendor)
+- **Photoshop** — [Adobe Indexed Color reference](https://helpx.adobe.com/photoshop/desktop/adjust-color/color-modes/conversion-options-for-indexed-color-images.html) — 4 native dither methods (None, Diffusion, Pattern, Noise) for Indexed Color and Bitmap modes
+- **Web tools** — typical feature set of free in-browser dither tools (dithermark, ditherit.com, etc.)
+
+Counts and capabilities are based on each tool's public documentation as of 2026. If you spot an inaccuracy, please [open an issue](https://github.com/MatteCarro/game-dither-dream/issues).
+
+</details>
 
 <br />
 
@@ -324,17 +420,110 @@ bun run deploy     # Deploy to Cloudflare Workers
 
 ---
 
+## 💻 Code Examples
+
+### Apply a dither programmatically
+
+```typescript
+import { dither, palettes, algorithms } from '@/lib/dither'
+
+const result = await dither({
+  source: imageData,
+  algorithm: algorithms.floydSteinberg,
+  palette: palettes.gameBoyDMG,
+  options: {
+    diffusionAmount: 0.6,
+    serpentine: true,
+    tonalProtection: 0.4,
+  },
+})
+
+// → ImageData ready to draw on Canvas
+```
+
+### Build a custom algorithm
+
+```typescript
+import { createAlgorithm } from '@/lib/dither'
+
+const myDither = createAlgorithm({
+  name: 'Vintage Press',
+  base: 'floydSteinberg',
+  patternSize: 4,
+  thresholdBias: -0.1,
+  diffusionWeight: 0.75,
+  edgePreservation: 0.5,
+  grainShaping: 0.25,
+})
+```
+
+### Batch process a folder
+
+```typescript
+import { batchProcess } from '@/lib/dither'
+
+await batchProcess({
+  files: imageFiles,
+  preset: 'pocket-lcd-mist',
+  output: './dithered/',
+  format: 'png',
+})
+```
+
+<br />
+
+---
+
 ## 🏗️ Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Framework** | [TanStack Start](https://tanstack.com/start) — React with full SSR |
-| **Language** | [TypeScript](https://www.typescriptlang.org/) |
-| **Build Tool** | [Vite](https://vitejs.dev/) |
-| **Runtime / Package Manager** | [Bun](https://bun.sh/) |
-| **Styling** | [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/) |
-| **Deployment** | [Cloudflare Workers](https://workers.cloudflare.com/) |
-| **Quality** | ESLint + Prettier |
+<table>
+<tr>
+<td align="center" width="33%">
+
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" width="48" /><br />
+<b>TypeScript</b><br />
+<sub>Type-safe core</sub>
+
+</td>
+<td align="center" width="33%">
+
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" width="48" /><br />
+<b>React + TanStack</b><br />
+<sub>SSR & routing</sub>
+
+</td>
+<td align="center" width="33%">
+
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vitejs/vitejs-original.svg" width="48" /><br />
+<b>Vite</b><br />
+<sub>Lightning build</sub>
+
+</td>
+</tr>
+<tr>
+<td align="center" width="33%">
+
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bun/bun-original.svg" width="48" /><br />
+<b>Bun</b><br />
+<sub>Runtime & PM</sub>
+
+</td>
+<td align="center" width="33%">
+
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/tailwindcss/tailwindcss-original.svg" width="48" /><br />
+<b>Tailwind + shadcn</b><br />
+<sub>Modern UI</sub>
+
+</td>
+<td align="center" width="33%">
+
+<img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cloudflare/cloudflare-original.svg" width="48" /><br />
+<b>Cloudflare</b><br />
+<sub>Edge deploy</sub>
+
+</td>
+</tr>
+</table>
 
 <br />
 
@@ -353,6 +542,7 @@ game-dither-dream/
 │   ├── server.ts         # SSR entry point
 │   ├── start.ts          # Application bootstrap
 │   └── styles.css        # Global styles
+├── docs/                 # Demo media & documentation
 ├── components.json       # shadcn/ui config
 ├── vite.config.ts        # Vite configuration
 ├── wrangler.jsonc        # Cloudflare Workers config
@@ -367,10 +557,13 @@ game-dither-dream/
 
 Dither Forge is engineered for real-time interactivity:
 
-- **Canvas-based rendering** — direct pixel manipulation, no DOM overhead
-- **Web Workers** — heavy algorithms run off the main thread *(in progress)*
-- **Edge deployment** — Cloudflare Workers, latency under 50ms worldwide
-- **Zero runtime dependencies** — pure browser APIs for the core engine
+| Aspect | Approach |
+|--------|----------|
+| **Rendering** | Canvas-based, direct pixel manipulation, no DOM overhead |
+| **Concurrency** | Web Workers — heavy algorithms run off the main thread *(in progress)* |
+| **Network** | Edge deployment via Cloudflare Workers, < 50ms latency worldwide |
+| **Bundle** | Zero runtime dependencies for the core engine — only browser APIs |
+| **Cold Start** | Streaming SSR via TanStack Start, first paint under 200ms |
 
 <br />
 
@@ -394,26 +587,47 @@ Dither Forge is engineered for real-time interactivity:
 
 ## 🗺️ Roadmap
 
-**✅ Shipped**
+<table>
+<tr>
+<td valign="top" width="33%">
+
+### ✅ Shipped
+
 - [x] Core dithering engine
-- [x] 12 dithering algorithms (incl. Stevenson–Arce, Shiau–Fan, Riemersma, Blue Noise)
+- [x] 12 dithering algorithms
 - [x] 30+ historical palettes
-- [x] Algorithm Lab with expert controls
+- [x] Algorithm Lab
 - [x] Batch processor
-- [x] CRT preview module
+- [x] CRT preview
+- [x] Side-by-side compare
 
-**🚧 In Progress**
-- [ ] PulseDeck — drag gestures and swipe interactions
-- [ ] DitherVerse community search
-- [ ] User profiles + preset sharing
-- [ ] Web Worker optimization
+</td>
+<td valign="top" width="33%">
 
-**🔮 Planned**
-- [ ] Animation / GIF dithering support
-- [ ] Plugin SDK for custom algorithms
-- [ ] Cloudflare Workers production deploy
-- [ ] Lospec palette import
-- [ ] Native desktop app (Tauri)
+### 🚧 In Progress
+
+- [ ] PulseDeck drag gestures
+- [ ] DitherVerse community
+- [ ] User profiles
+- [ ] Preset sharing
+- [ ] Web Worker offload
+- [ ] Mobile-first redesign
+
+</td>
+<td valign="top" width="33%">
+
+### 🔮 Planned
+
+- [ ] GIF / animation dithering
+- [ ] Plugin SDK
+- [ ] Production deploy
+- [ ] Lospec import
+- [ ] Native desktop (Tauri)
+- [ ] CLI version
+
+</td>
+</tr>
+</table>
 
 <br />
 
@@ -443,6 +657,26 @@ For larger changes, please open an issue first to discuss what you'd like to cha
 
 ---
 
+## 💖 Support the Project
+
+If you find Dither Forge useful, consider:
+
+<p align="center">
+  <a href="https://github.com/MatteCarro/game-dither-dream">
+    <img src="https://img.shields.io/badge/⭐_Star_on-GitHub-F4D35E?style=for-the-badge&labelColor=0d1117" alt="Star on GitHub" />
+  </a>
+  <a href="https://github.com/MatteCarro/game-dither-dream/issues">
+    <img src="https://img.shields.io/badge/💬_Send-Feedback-83C5BE?style=for-the-badge&labelColor=0d1117" alt="Send Feedback" />
+  </a>
+  <a href="https://github.com/MatteCarro">
+    <img src="https://img.shields.io/badge/👤_Follow-@MatteCarro-FF6B35?style=for-the-badge&labelColor=0d1117" alt="Follow" />
+  </a>
+</p>
+
+<br />
+
+---
+
 ## 📜 Acknowledgments
 
 - **Robert W. Floyd & Louis Steinberg** — for the 1976 paper that started it all
@@ -450,6 +684,7 @@ For larger changes, please open an issue first to discuss what you'd like to cha
 - **Christoph Peters & Bart Wronski** — for foundational work on blue noise dithering
 - **The Lospec community** — for documenting historical palettes
 - **PICO-8** by Lexaloffle — palette inspiration
+- The **[Ditherista](https://github.com/robertkist/ditherista)** team — for raising the bar in open-source dithering tools
 - All retro hardware engineers who, decades ago, accidentally invented an aesthetic
 
 <br />
@@ -465,6 +700,8 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
 ---
 
 <div align="center">
+
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=12,6,30&height=120&section=footer" width="100%" />
 
 <sub>
 Built with ☕ and a lot of pixels by <a href="https://github.com/MatteCarro">@MatteCarro</a> · 2026
