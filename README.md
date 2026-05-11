@@ -181,7 +181,7 @@ TypeScript + React + TanStack Start, deployed on Cloudflare Workers. No installa
 
 <div align="center">
 
-<img src="docs/gif.gif" alt="Dither Forge — live demo" width="85%" />
+<img src="docs/gif2.gif" alt="Dither Forge — live demo" width="85%" />
 
 <br />
 <sub><i>Real-time dithering with palette switching, algorithm comparison and CRT preview.</i></sub>
