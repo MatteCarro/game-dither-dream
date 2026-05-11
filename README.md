@@ -2,7 +2,7 @@
 
 <br />
 
-<img src="docs/gif.gif" alt="Dither Forge" width="100%" />
+<img src="docs/gif2.gif" alt="Dither Forge" width="100%" />
 
 <br />
 <br />
@@ -181,10 +181,20 @@ TypeScript + React + TanStack Start, deployed on Cloudflare Workers. No installa
 
 <div align="center">
 
-<img src="docs/gif2.gif" alt="Dither Forge — live demo" width="85%" />
-
+<table>
+<tr>
+<td align="center" width="50%">
+<img src="docs/gif2.gif" alt="Dither Forge — live demo" width="100%" />
 <br />
 <sub><i>Real-time dithering with palette switching, algorithm comparison and CRT preview.</i></sub>
+</td>
+<td align="center" width="50%">
+<img src="docs/gif3.gif" alt="PulseDeck — social alpha preview" width="100%" />
+<br />
+<sub><i>Alpha preview of the social PulseDeck section — swipe-based community preset discovery.</i></sub>
+</td>
+</tr>
+</table>
 
 </div>
 
