@@ -2,7 +2,7 @@
 
 <br />
 
-<img src="docs/gif2.gif" alt="Dither Forge" width="100%" />
+<img src="docs/gif.gif" alt="Dither Forge" width="100%" />
 
 <br />
 <br />
